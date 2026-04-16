@@ -1,0 +1,598 @@
+/* ── GLOBAL VARIABLES ────────────────────────────────────────
+   Define colors and values once here, use everywhere.
+   Change color in one place = change throughout application */
+:root {
+    --bg: #0f1117;           /* main background — very dark blue */
+    --bg-card: #1a1d27;      /* cards and panels background — slightly lighter */
+    --bg-input: #22253a;     /* form fields background */
+    --border: #2e3248;       /* border color */
+    --accent: #6c63ff;       /* main accent color — purple */
+    --accent-hover: #5a52e0; /* accent on hover */
+    --success: #22c55e;      /* green — approved */
+    --warning: #f59e0b;      /* yellow — pending */
+    --danger: #ef4444;       /* red — rejected / delete */
+    --text: #e8eaf6;         /* main text color — light */
+    --text-muted: #6b7280;   /* secondary text — gray */
+    --radius: 12px;          /* corner radius for elements */
+    --shadow: 0 4px 24px rgba(0,0,0,0.4); /* card shadow */
+}
+
+/* ── RESET AND BASICS ─────────────────────────────────────────
+   Remove default browser styles that differ between
+   Chrome, Firefox and Edge */
+*, *::before, *::after {
+    box-sizing: border-box; /* padding doesn't expand element beyond its width */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* Syne font only for headings */
+h1, h2, h3, .brand-icon {
+    font-family: 'Syne', sans-serif;
+}
+
+/* ── STRONA LOGOWANIA ───────────────────────────────────────*/
+
+/* Flexbox centruje kartę logowania na środku ekranu */
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    /* Subtle gradient background instead of flat color */
+    background: radial-gradient(ellipse at 60% 20%, #1e1b4b 0%, #0f1117 60%);
+}
+
+.login-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow);
+    /* Animacja pojawienia się karty przy załadowaniu strony */
+    animation: fadeUp 0.5s ease;
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.login-brand h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.brand-icon {
+    font-size: 32px;
+    color: var(--accent);
+}
+
+.login-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 32px;
+}
+
+/* ── FORMULARZE ─────────────────────────────────────────────*/
+
+.login-form {
+    display: flex;
+    flex-direction: column; /* elementy jeden pod drugim */
+    gap: 20px;              /* odstęp między elementami */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s; /* smooth border color change */
+    outline: none;
+}
+
+/* Highlight field when user is typing */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--accent);
+}
+
+/* ── PRZYCISKI ──────────────────────────────────────────────*/
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 13px 24px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px); /* gentle lift on hover */
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    background: rgba(108, 99, 255, 0.08);
+}
+
+.btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── KOMUNIKAT BŁĘDU ────────────────────────────────────────*/
+
+.error-msg {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 14px;
+}
+
+/* ── LAYOUT DASHBOARDU ──────────────────────────────────────*/
+
+/* CSS Grid dzieli ekran na dwie kolumny: wąski sidebar i główna treść */
+.app-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+
+/* ── SIDEBAR (left navigation panel) ────────────────────────*/
+
+.sidebar {
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Sidebar stays in place when scrolling content */
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+}
+
+.sidebar-brand span {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+/* Single link in sidebar */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.nav-item:hover {
+    background: rgba(108, 99, 255, 0.08);
+    color: var(--text);
+}
+
+/* Active tab — highlighted */
+.nav-item.active {
+    background: rgba(108, 99, 255, 0.15);
+    color: var(--accent);
+}
+
+.nav-icon { font-size: 18px; }
+
+/* Push logout button to the very bottom of sidebar */
+.sidebar-spacer { flex: 1; }
+
+/* ── GŁÓWNA TREŚĆ ───────────────────────────────────────────*/
+
+.main-content {
+    padding: 32px;
+    overflow-y: auto;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 800;
+    font-family: 'Syne', sans-serif;
+}
+
+/* ── KARTY ──────────────────────────────────────────────────*/
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+/* ── KALENDARZ ──────────────────────────────────────────────*/
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.calendar-nav h2 {
+    font-size: 20px;
+    font-weight: 700;
+    min-width: 200px;
+    text-align: center;
+}
+
+/* Calendar grid — 7 columns (days of week) */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+/* Week day headers (Mon, Tue, Wed...) */
+.calendar-day-header {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding: 8px 0;
+    letter-spacing: 0.05em;
+}
+
+/* Single day in calendar */
+.calendar-day {
+    min-height: 90px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.calendar-day:hover {
+    border-color: var(--accent);
+}
+
+/* Day from different month — dimmed */
+.calendar-day.other-month {
+    opacity: 0.3;
+}
+
+/* Today's day — highlighted */
+.calendar-day.today {
+    border-color: var(--accent);
+    background: rgba(108, 99, 255, 0.08);
+}
+
+.day-number {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.calendar-day.today .day-number {
+    color: var(--accent);
+}
+
+/* Shift tile inside day */
+.shift-chip {
+    background: rgba(108, 99, 255, 0.2);
+    border: 1px solid rgba(108, 99, 255, 0.4);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* "..." when text is too long */
+    color: var(--accent);
+}
+
+/* ── EMPLOYEE TABLE ───────────────────────────────*/
+
+.table {
+    width: 100%;
+    border-collapse: collapse; /* remove spacing between cells */
+    font-size: 14px;
+}
+
+.table th {
+    text-align: left;
+    padding: 12px 16px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+}
+
+.table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover td {
+    background: rgba(255,255,255,0.02);
+}
+
+/* ── EMPLOYEE LABELS ──────────────────────────────────*/
+
+/* Colored label e.g. "Operator" — color set dynamically by JS */
+.label-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(108, 99, 255, 0.15);
+    color: var(--accent);
+}
+
+/* ── STATUS PRÓŚB ───────────────────────────────────────────*/
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pending  { background: rgba(245,158,11,0.15); color: var(--warning); }
+.status-approved { background: rgba(34,197,94,0.15);  color: var(--success); }
+.status-rejected { background: rgba(239,68,68,0.15);  color: var(--danger);  }
+
+/* ── MODAL (dialog box) ─────────────────────────────*/
+
+/* Dark background behind modal */
+.modal-overlay {
+    display: none; /* hidden by default */
+    position: fixed;
+    inset: 0; /* covers entire screen */
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px); /* background blur */
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+/* When modal is active — show it as flexbox */
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-close:hover { color: var(--text); }
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+/* ── POWIADOMIENIA ──────────────────────────────────────────*/
+
+.notif-badge {
+    background: var(--danger);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+.notif-item {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.notif-item.unread {
+    color: var(--text);
+}
+
+.notif-item.read {
+    color: var(--text-muted);
+}
+
+.notif-time {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ── STATYSTYKI ─────────────────────────────────────────────*/
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+}
+
+.stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ── ANIMACJE ───────────────────────────────────────────────*/
+
+/* Element pojawia się od dołu z efektem fade — używamy na kartach i modalach */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── SCROLLBAR ──────────────────────────────────────────────*/
+
+/* Style scrollbar to match dark theme */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }

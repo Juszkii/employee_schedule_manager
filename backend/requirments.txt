@@ -1,0 +1,68 @@
+Data base structure:
+🗄️ Struktura bazy danych
+users
+├── id, name, email, password_hash, role (manager/employee)
+└── label_id → FK → labels
+
+labels
+└── id, name, color (np. "Operator", "#FF5733")
+
+shifts
+├── id, user_id → FK → users
+├── date, start_time, end_time
+└── note
+
+requests
+├── id, user_id → FK → users
+├── type (urlop / zamiana)
+├── date_from, date_to
+├── status (pending / approved / rejected)
+└── message
+
+notifications
+├── id, user_id → FK → users
+├── message, is_read
+└── created_at
+
+Api endpoints:
+
+POST   /api/auth/login
+POST   /api/auth/logout
+
+GET    /api/users              ← manager
+POST   /api/users              ← manager
+PUT    /api/users/<id>         ← manager
+DELETE /api/users/<id>         ← manager
+
+GET    /api/labels
+POST   /api/labels             ← manager
+
+GET    /api/shifts             ← ?month=2025-04
+POST   /api/shifts             ← manager
+PUT    /api/shifts/<id>        ← manager
+DELETE /api/shifts/<id>        ← manager
+
+GET    /api/requests
+POST   /api/requests           ← pracownik
+PUT    /api/requests/<id>      ← manager (zatwierdź/odrzuć)
+
+GET    /api/notifications
+PUT    /api/notifications/<id>/read
+GET    /api/stats              ← manager
+
+🖥️ Strony frontendowe
+/login              → formularz logowania
+/dashboard          → kalendarz miesięczny z grafikiem
+/employees          → lista pracowników (tylko manager)
+/requests           → prośby o urlop/zamianę
+/stats              → statystyki godzin pracy (tylko manager)
+
+🚀 Kolejność implementacji
+EtapCo robimy
+1Setup projektu, baza danych, modele SQLAlchemy
+2Logowanie + JWT, system ról
+3Backend: shifts, users, labels
+4Frontend: login + kalendarz
+5Backend + Frontend: prośby i powiadomienia
+6Statystyki
+7Tailwind — dopieszczenie wyglądu

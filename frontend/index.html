@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - GrafikApp</title>
+
+    <!-- Import two fonts from Google Fonts -->
+    <!-- Syne — modern, geometric font for headings -->
+    <!-- DM Sans — readable font for text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="login-page">
+
+    <div class="login-container">
+
+        <!-- Application logo -->
+        <div class="login-brand">
+            <span class="brand-icon">⚡</span>
+            <h1>GrafikApp</h1>
+        </div>
+        <p class="login-subtitle">Employee Schedule Management System</p>
+
+        <!-- Login form -->
+        <!-- id="login-form" — auth.js will find this form by this ID -->
+        <form id="login-form" class="login-form">
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <!-- id="email" — auth.js will get the value from this field -->
+                <input type="email" id="email" placeholder="your@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <!-- Error message will appear here if login fails -->
+            <div id="error-msg" class="error-msg" style="display:none"></div>
+
+            <!-- id="login-btn" — auth.js changes button text during login -->
+            <button type="submit" id="login-btn" class="btn-primary">Sign In</button>
+
+        </form>
+    </div>
+
+    <!-- Script order is important — api.js must be loaded first since auth.js uses it -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>

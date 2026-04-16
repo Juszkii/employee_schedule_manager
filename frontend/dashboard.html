@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - GrafikApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-icon">⬡</span>
+            <span>GrafikApp</span>
+        </div>
+
+        <!-- Navigation buttons — JS switches between views without page reload -->
+        <button class="nav-item active" onclick="showView('calendar')">
+            <span class="nav-icon">📅</span> Schedule
+        </button>
+        <button class="nav-item" onclick="showView('employees')" id="nav-employees">
+            <span class="nav-icon">👥</span> Employees
+        </button>
+        <button class="nav-item" onclick="showView('requests')">
+            <span class="nav-icon">📋</span> Requests
+        </button>
+        <button class="nav-item" onclick="showView('notifications')">
+            <span class="nav-icon">🔔</span> Notifications
+            <!-- Red badge with unread notification count -->
+            <span class="notif-badge" id="notif-count" style="display:none">0</span>
+        </button>
+        <button class="nav-item" onclick="showView('stats')" id="nav-stats">
+            <span class="nav-icon">📊</span> Statistics
+        </button>
+
+        <div class="sidebar-spacer"></div>
+
+        <!-- Logged-in user information -->
+        <div style="padding: 12px 14px; font-size:13px; color: var(--text-muted);">
+            <div id="user-name" style="color: var(--text); font-weight:600;"></div>
+            <div id="user-role"></div>
+        </div>
+
+        <button class="nav-item" onclick="logout()">
+            <span class="nav-icon">🚪</span> Logout
+        </button>
+    </aside>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main-content">
+
+        <!-- VIEW: SCHEDULE -->
+        <div id="view-calendar">
+            <div class="page-header">
+                <h1 class="page-title">Monthly Schedule</h1>
+                <!-- Add shift button — visible only to manager -->
+                <button class="btn-primary manager-only" onclick="openAddShiftModal()" style="width:auto; padding: 10px 20px;">
+                    + Add Shift
+                </button>
+            </div>
+
+            <div class="card">
+                <!-- Month navigation -->
+                <div class="calendar-nav">
+                    <button class="btn-secondary" onclick="changeMonth(-1)">← Previous</button>
+                    <h2 id="calendar-title"></h2>
+                    <button class="btn-secondary" onclick="changeMonth(1)">Next →</button>
+                </div>
+                <!-- Calendar grid rendered by JS -->
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+        </div>
+
+        <!-- VIEW: EMPLOYEES (manager only) -->
+        <div id="view-employees" style="display:none">
+            <div class="page-header">
+                <h1 class="page-title">Employees</h1>
+                <button class="btn-primary" onclick="openAddEmployeeModal()" style="width:auto; padding: 10px 20px;">
+                    + Add Employee
+                </button>
+            </div>
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Label</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <!-- Employee rows inserted by JS -->
+                    <tbody id="employees-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW: REQUESTS -->
+        <div id="view-requests" style="display:none">
+            <div class="page-header">
+                <h1 class="page-title">Requests</h1>
+                <!-- Employee can submit request, manager can only view -->
+                <button class="btn-primary employee-only" onclick="openAddRequestModal()" style="width:auto; padding: 10px 20px;">
+                    + Submit Request
+                </button>
+            </div>
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requests-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW: NOTIFICATIONS -->
+        <div id="view-notifications" style="display:none">
+            <div class="page-header">
+                <h1 class="page-title">Notifications</h1>
+            </div>
+            <div class="card">
+                <div id="notifications-list"></div>
+            </div>
+        </div>
+
+        <!-- VIEW: STATISTICS (manager only) -->
+        <div id="view-stats" style="display:none">
+            <div class="page-header">
+                <h1 class="page-title">Statistics</h1>
+            </div>
+            <div class="stats-grid" id="stats-grid"></div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ── MODAL: ADD SHIFT ── -->
+<div class="modal-overlay" id="modal-shift">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Add Shift</h2>
+            <button class="modal-close" onclick="closeModal('modal-shift')">×</button>
+        </div>
+        <div class="form-group">
+            <label>Employee</label>
+            <select id="shift-user"></select>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>Date</label>
+            <input type="date" id="shift-date">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>Start Time</label>
+            <input type="time" id="shift-start">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>End Time</label>
+            <input type="time" id="shift-end">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>Note (optional)</label>
+            <input type="text" id="shift-note" placeholder="e.g. Morning shift">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('modal-shift')">Cancel</button>
+            <button class="btn-primary" style="width:auto" onclick="saveShift()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: ADD EMPLOYEE ── -->
+<div class="modal-overlay" id="modal-employee">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Add Employee</h2>
+            <button class="modal-close" onclick="closeModal('modal-employee')">×</button>
+        </div>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="emp-name" placeholder="John Doe">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>Email</label>
+            <input type="email" id="emp-email" placeholder="john@company.com">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>Password</label>
+            <input type="password" id="emp-password" placeholder="••••••••">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>Label</label>
+            <select id="emp-label">
+                <option value="">No label</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('modal-employee')">Cancel</button>
+            <button class="btn-primary" style="width:auto" onclick="saveEmployee()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: SUBMIT REQUEST ── -->
+<div class="modal-overlay" id="modal-request">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Submit Request</h2>
+            <button class="modal-close" onclick="closeModal('modal-request')">×</button>
+        </div>
+        <div class="form-group">
+            <label>Request Type</label>
+            <select id="req-type">
+                <option value="urlop">Time Off</option>
+                <option value="zamiana">Shift Swap</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>From</label>
+            <input type="date" id="req-from">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>To</label>
+            <input type="date" id="req-to">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label>Message (optional)</label>
+            <textarea id="req-message" rows="3" placeholder="Additional information..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('modal-request')">Cancel</button>
+            <button class="btn-primary" style="width:auto" onclick="saveRequest()">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- Script order is important — api.js must be first -->
+<script src="assets/js/api.js"></script>
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>
