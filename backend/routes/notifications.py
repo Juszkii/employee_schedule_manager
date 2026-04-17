@@ -30,3 +30,20 @@ def mark_read(notif_id):
     notif.is_read = True
     db.session.commit()
     return jsonify(notif.to_dict()), 200
+
+
+@notifications_bp.route("/read-all", methods=["PUT"])
+@jwt_required()
+def mark_all_read():
+    """Mark all notifications as read for current user"""
+    user_id = get_jwt_identity()
+    notifications = Notification.query.filter_by(
+        user_id=int(user_id),
+        is_read=False
+    ).all()
+
+    for notif in notifications:
+        notif.is_read = True
+    
+    db.session.commit()
+    return jsonify({"message": f"Marked {len(notifications)} notification(s) as read"}), 200

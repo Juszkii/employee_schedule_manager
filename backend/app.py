@@ -19,6 +19,9 @@ def create_app():
     from routes.requests import requests_bp
     from routes.notifications import notifications_bp
     from routes.stats import stats_bp
+    from routes.positions import positions_bp
+    from routes.departments import departments_bp
+    from routes.announcements import announcements_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(users_bp, url_prefix="/api/users")
@@ -26,6 +29,9 @@ def create_app():
     app.register_blueprint(requests_bp, url_prefix="/api/requests")
     app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
     app.register_blueprint(stats_bp, url_prefix="/api/stats")
+    app.register_blueprint(positions_bp, url_prefix="/api/positions")
+    app.register_blueprint(departments_bp, url_prefix="/api/departments")
+    app.register_blueprint(announcements_bp, url_prefix="/api/announcements")
 
     with app.app_context():
         db.create_all()
@@ -47,7 +53,7 @@ def seed_data(app):
         )
         db.session.add(manager)
         db.session.commit()
-        print("✅ Manager account created: manager@test.com / admin123")
+        print("Manager account created: manager@test.com / admin123")
 
 
 if __name__ == "__main__":

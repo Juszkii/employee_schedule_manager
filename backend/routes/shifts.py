@@ -1,7 +1,17 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, User, Shift
+from models import db, User, Shift, Position, Request
 from datetime import date
+
+
+def _has_approved_leave(user_id, shift_date):
+    return Request.query.filter(
+        Request.user_id == user_id,
+        Request.type == "urlop",
+        Request.status == "approved",
+        Request.date_from <= shift_date,
+        Request.date_to >= shift_date,
+    ).first() is not None
 
 shifts_bp = Blueprint("shifts", __name__)
 
@@ -48,13 +58,39 @@ def create_shift():
         return jsonify({"error": "Permission denied"}), 403
 
     data = request.get_json()
-    from datetime import datetime, time
+    from datetime import datetime, time as time_type
+
+    # Parse input dates/times
+    shift_date = date.fromisoformat(data["date"])
+    start_time = datetime.strptime(data["start_time"], "%H:%M").time()
+    end_time = datetime.strptime(data["end_time"], "%H:%M").time()
+
+    # Validate times
+    if start_time >= end_time:
+        return jsonify({"error": "Start time must be before end time"}), 400
+
+    # Check for overlapping shifts for the same employee on the same day
+    conflicting = Shift.query.filter(
+        Shift.user_id == data["user_id"],
+        Shift.date == shift_date,
+        Shift.start_time < end_time,  # Other shift starts before our shift ends
+        Shift.end_time > start_time,  # Other shift ends after our shift starts
+    ).first()
+
+    if conflicting:
+        return jsonify({
+            "error": f"Scheduling conflict: employee already has a shift from {conflicting.start_time.strftime('%H:%M')} to {conflicting.end_time.strftime('%H:%M')} on this date"
+        }), 409
+
+    if _has_approved_leave(data["user_id"], shift_date):
+        return jsonify({"error": "Cannot schedule a shift: employee has approved time off on this date"}), 409
 
     shift = Shift(
         user_id=data["user_id"],
-        date=date.fromisoformat(data["date"]),
-        start_time=datetime.strptime(data["start_time"], "%H:%M").time(),
-        end_time=datetime.strptime(data["end_time"], "%H:%M").time(),
+        position_id=data.get("position_id"),
+        date=shift_date,
+        start_time=start_time,
+        end_time=end_time,
         note=data.get("note"),
     )
     db.session.add(shift)
@@ -86,16 +122,47 @@ def update_shift(shift_id):
         return jsonify({"error": "Shift not found"}), 404
 
     data = request.get_json()
-    from datetime import datetime
+    from datetime import datetime, time as time_type
 
-    if "date" in data:
-        shift.date = date.fromisoformat(data["date"])
-    if "start_time" in data:
-        shift.start_time = datetime.strptime(data["start_time"], "%H:%M").time()
-    if "end_time" in data:
-        shift.end_time = datetime.strptime(data["end_time"], "%H:%M").time()
+    # Store old values for reference
+    old_date = shift.date
+    old_start = shift.start_time
+    old_end = shift.end_time
+
+    # Parse new values (or keep old ones if not provided)
+    new_date = date.fromisoformat(data["date"]) if "date" in data else old_date
+    new_start = datetime.strptime(data["start_time"], "%H:%M").time() if "start_time" in data else old_start
+    new_end = datetime.strptime(data["end_time"], "%H:%M").time() if "end_time" in data else old_end
+
+    # Validate times
+    if new_start >= new_end:
+        return jsonify({"error": "Start time must be before end time"}), 400
+
+    # Check for overlapping shifts (excluding current shift)
+    conflicting = Shift.query.filter(
+        Shift.id != shift_id,  # Exclude current shift
+        Shift.user_id == shift.user_id,
+        Shift.date == new_date,
+        Shift.start_time < new_end,
+        Shift.end_time > new_start,
+    ).first()
+
+    if conflicting:
+        return jsonify({
+            "error": f"Scheduling conflict: employee already has a shift from {conflicting.start_time.strftime('%H:%M')} to {conflicting.end_time.strftime('%H:%M')} on this date"
+        }), 409
+
+    if _has_approved_leave(shift.user_id, new_date):
+        return jsonify({"error": "Cannot schedule a shift: employee has approved time off on this date"}), 409
+
+    # Apply changes
+    shift.date = new_date
+    shift.start_time = new_start
+    shift.end_time = new_end
     if "note" in data:
         shift.note = data["note"]
+    if "position_id" in data:
+        shift.position_id = data["position_id"]
 
     # Notification about shift change
     from models import Notification

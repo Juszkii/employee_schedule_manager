@@ -69,6 +69,8 @@ def update_user(user_id):
     user.name = data.get("name", user.name)
     user.role = data.get("role", user.role)
     user.label_id = data.get("label_id", user.label_id)
+    if "department_id" in data:
+        user.department_id = data["department_id"]
 
     db.session.commit()
     return jsonify(user.to_dict()), 200
@@ -110,6 +112,11 @@ def create_label():
         return error, code
 
     data = request.get_json()
+    if not data.get("name"):
+        return jsonify({"error": "Name is required"}), 400
+    if Label.query.filter_by(name=data["name"]).first():
+        return jsonify({"error": "Role with this name already exists"}), 400
+
     label = Label(
         name=data["name"],
         color=data.get("color", "#3B82F6")
@@ -117,3 +124,21 @@ def create_label():
     db.session.add(label)
     db.session.commit()
     return jsonify(label.to_dict()), 201
+
+
+@users_bp.route("/labels/<int:label_id>", methods=["DELETE"])
+@jwt_required()
+def delete_label(label_id):
+    """Delete label - manager only"""
+    current_user, error, code = manager_required()
+    if error:
+        return error, code
+
+    label = db.session.get(Label, label_id)
+    if not label:
+        return jsonify({"error": "Label not found"}), 404
+
+    User.query.filter_by(label_id=label_id).update({"label_id": None})
+    db.session.delete(label)
+    db.session.commit()
+    return jsonify({"message": "Label deleted"}), 200

@@ -2,20 +2,13 @@
 const API_URL = "http://127.0.0.1:5000/api";
 
 // Function fetching token from browser memory
-// localStorage is where browser stores data even after closing the tab
 const getToken = () => localStorage.getItem("token");
 
-// Main API communication function — we use it everywhere in the project
-// endpoint = what we want to do, e.g. "/auth/login"
-// method = request type: GET (fetch), POST (create), PUT (edit), DELETE (remove)
-// body = data we send to server (e.g. email and password)
 async function apiFetch(endpoint, method = "GET", body = null) {
     const headers = {
-        "Content-Type": "application/json", // tell server we're sending JSON
+        "Content-Type": "application/json",
     };
 
-    // If user is logged in, attach their token to every request
-    // Backend checks this token and knows who is asking and what role they have
     const token = getToken();
     if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -23,25 +16,31 @@ async function apiFetch(endpoint, method = "GET", body = null) {
 
     const options = { method, headers };
 
-    // If we're sending data, convert JavaScript object to JSON text
-    // JSON.stringify({email: "a@b.com"}) → '{"email":"a@b.com"}'
     if (body) {
         options.body = JSON.stringify(body);
     }
 
-    // fetch() is a built-in browser function for sending HTTP requests
-    // async/await means we wait for response before continuing
-    const response = await fetch(`${API_URL}${endpoint}`, options);
-
-    // If server returned 401 (expired or wrong token) — log out user
-    if (response.status === 401) {
-        localStorage.clear();
-        window.location.href = "index.html";
-        return;
+    let response;
+    try {
+        response = await fetch(`${API_URL}${endpoint}`, options);
+    } catch (networkErr) {
+        console.error("Network error:", networkErr);
+        return { error: "Cannot reach server. Make sure the backend is running." };
     }
 
-    // Convert server response from JSON text to JavaScript object
-    return response.json();
+    if (response.status === 401) {
+        console.warn("401 Unauthorized on", method, endpoint, "— redirecting to login");
+        localStorage.clear();
+        window.location.href = "index.html";
+        return null;
+    }
+
+    try {
+        return await response.json();
+    } catch (parseErr) {
+        console.error("JSON parse error (status " + response.status + "):", parseErr);
+        return { error: "Server returned an unexpected response (status " + response.status + ")." };
+    }
 }
 
 // Helper function — fetches logged in user data from browser memory

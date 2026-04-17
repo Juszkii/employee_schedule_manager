@@ -28,11 +28,20 @@ def create_request():
     user_id = get_jwt_identity()
     data = request.get_json()
 
+    if not data.get("date_from") or not data.get("date_to"):
+        return jsonify({"error": "Both From and To dates are required"}), 400
+
+    date_from = date.fromisoformat(data["date_from"])
+    date_to   = date.fromisoformat(data["date_to"])
+
+    if date_to < date_from:
+        return jsonify({"error": "End date cannot be before start date"}), 400
+
     req = Request(
         user_id=int(user_id),
-        type=data["type"],  # "time_off" or "shift_swap"
-        date_from=date.fromisoformat(data["date_from"]),
-        date_to=date.fromisoformat(data["date_to"]),
+        type=data["type"],
+        date_from=date_from,
+        date_to=date_to,
         message=data.get("message"),
     )
     db.session.add(req)
