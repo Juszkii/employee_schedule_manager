@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - GrafikApp</title>
+    <title>SharkFlow</title>
 
     <!-- Import two fonts from Google Fonts -->
     <!-- Syne — modern, geometric font for headings -->
@@ -11,45 +11,69 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
 </head>
 <body class="login-page">
 
+    <!-- Przełącznik języka -->
+    <div class="login-lang-picker">
+        <button type="button" class="login-flag-btn" data-lang="en" onclick="setLoginLang('en')">
+            <svg width="28" height="19" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+                <rect width="60" height="40" fill="#012169"/>
+                <path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="8"/>
+                <path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="5"/>
+                <path d="M30,0 V40 M0,20 H60" stroke="#fff" stroke-width="12"/>
+                <path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="8"/>
+            </svg>
+            <span>EN</span>
+        </button>
+        <button type="button" class="login-flag-btn" data-lang="pl" onclick="setLoginLang('pl')">
+            <svg width="28" height="19" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+                <rect width="60" height="20" fill="#fff"/>
+                <rect y="20" width="60" height="20" fill="#DC143C"/>
+            </svg>
+            <span>PL</span>
+        </button>
+    </div>
+
     <div class="login-container">
 
-        <!-- Application logo -->
+        <!-- Logo -->
         <div class="login-brand">
-            <span class="brand-icon">⚡</span>
-            <h1>GrafikApp</h1>
+            <img src="assets/images/logo.png" alt="SharkFlow" class="login-logo-img">
         </div>
-        <p class="login-subtitle">Employee Schedule Management System</p>
+        <p class="login-subtitle" data-i18n="login_subtitle"></p>
 
-        <!-- Login form -->
-        <!-- id="login-form" — auth.js will find this form by this ID -->
         <form id="login-form" class="login-form">
-
             <div class="form-group">
-                <label for="email">Email</label>
-                <!-- id="email" — auth.js will get the value from this field -->
+                <label for="email" data-i18n="label_email">Email</label>
                 <input type="email" id="email" placeholder="your@email.com" required>
             </div>
-
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password" data-i18n="label_password">Password</label>
                 <input type="password" id="password" placeholder="••••••••" required>
             </div>
-
-            <!-- Error message will appear here if login fails -->
             <div id="error-msg" class="error-msg" style="display:none"></div>
-
-            <!-- id="login-btn" — auth.js changes button text during login -->
-            <button type="submit" id="login-btn" class="btn-primary">Sign In</button>
-
+            <button type="submit" id="login-btn" class="btn-primary" data-i18n="login_btn">Sign In</button>
         </form>
     </div>
 
     <!-- Script order is important — api.js must be loaded first since auth.js uses it -->
     <script src="assets/js/api.js"></script>
+    <script src="assets/js/translations.js"></script>
+    <script>
+        function setLoginLang(lang) {
+            localStorage.setItem("lang", lang);
+            document.querySelectorAll(".login-flag-btn").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.lang === lang);
+            });
+            applyLanguage();
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            const lang = localStorage.getItem("lang") || "en";
+            setLoginLang(lang);
+        });
+    </script>
     <script src="assets/js/auth.js"></script>
 </body>
 </html>

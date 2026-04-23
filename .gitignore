@@ -5,3 +5,7 @@ desktop.ini
 .DS_Store
 .vscode/
 .env
+__pycache__/
+*.pyc
+*.pyo
+.claude/

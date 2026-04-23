@@ -1,24 +1,27 @@
-// Address of our Flask backend — all requests will go to this address
-const API_URL = "http://127.0.0.1:5000/api";
+// Relative URL — works because Flask now serves both frontend and API
+const API_URL = "/api";
 
-// Function fetching token from browser memory
-const getToken = () => localStorage.getItem("token");
+function _getCsrfToken() {
+    const match = document.cookie.split(";").find(c => c.trim().startsWith("csrf_access_token="));
+    return match ? match.trim().split("=")[1] : null;
+}
 
 async function apiFetch(endpoint, method = "GET", body = null) {
-    const headers = {
-        "Content-Type": "application/json",
+    const headers = { "Content-Type": "application/json" };
+
+    // CSRF token required for state-changing requests (cookie-based auth)
+    if (["POST", "PUT", "DELETE", "PATCH"].includes(method)) {
+        const csrf = _getCsrfToken();
+        if (csrf) headers["X-CSRF-TOKEN"] = csrf;
+    }
+
+    const options = {
+        method,
+        headers,
+        credentials: "include",  // send HttpOnly JWT cookie automatically
     };
 
-    const token = getToken();
-    if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    const options = { method, headers };
-
-    if (body) {
-        options.body = JSON.stringify(body);
-    }
+    if (body) options.body = JSON.stringify(body);
 
     let response;
     try {
@@ -30,8 +33,8 @@ async function apiFetch(endpoint, method = "GET", body = null) {
 
     if (response.status === 401) {
         console.warn("401 Unauthorized on", method, endpoint, "— redirecting to login");
-        localStorage.clear();
-        window.location.href = "index.html";
+        localStorage.removeItem("user");
+        window.location.href = "/index.html";
         return null;
     }
 
@@ -43,14 +46,17 @@ async function apiFetch(endpoint, method = "GET", body = null) {
     }
 }
 
-// Helper function — fetches logged in user data from browser memory
 function getCurrentUser() {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
 }
 
-// Check if logged in user is a manager
 function isManager() {
     const user = getCurrentUser();
     return user && user.role === "manager";
+}
+
+// min 8 chars, at least one upper, one lower, one digit
+function isStrongPassword(pw) {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pw);
 }

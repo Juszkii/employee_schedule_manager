@@ -1,25 +1,28 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, User, Shift
+import re
 from datetime import datetime
 
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
+from models import db, Shift
+from auth_utils import manager_required
+
 stats_bp = Blueprint("stats", __name__)
+
+_MONTH_RE = re.compile(r"^\d{4}-(?:0[1-9]|1[0-2])$")
 
 
 @stats_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_stats():
-    """
-    Returns work hour statistics per employee - manager only.
-    Parameter: ?month=2025-04
-    """
-    user_id = get_jwt_identity()
-    current_user = db.session.get(User, int(user_id))
-
-    if current_user.role != "manager":
-        return jsonify({"error": "Permission denied"}), 403
+    current_user, error, code = manager_required()
+    if error:
+        return error, code
 
     month = request.args.get("month")
+
+    if month and not _MONTH_RE.match(month):
+        return jsonify({"error": "Invalid month format. Use YYYY-MM"}), 400
+
     query = Shift.query
 
     if month:
@@ -31,7 +34,6 @@ def get_stats():
 
     shifts = query.all()
 
-    # Calculate hours per employee
     stats = {}
     for shift in shifts:
         uid = shift.user_id
@@ -43,7 +45,6 @@ def get_stats():
                 "shifts_count": 0,
             }
 
-        # Obliczamy długość zmiany w godzinach
         start = datetime.combine(shift.date, shift.start_time)
         end = datetime.combine(shift.date, shift.end_time)
         hours = (end - start).seconds / 3600

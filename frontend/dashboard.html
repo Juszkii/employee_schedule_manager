@@ -3,56 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - GrafikApp</title>
+    <title>SharkFlow</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
 </head>
 <body>
+
+<!-- ── MOBILE TOP BAR ── -->
+<header class="mobile-topbar">
+    <img src="assets/images/logo.png" alt="SharkFlow" class="mobile-topbar-logo">
+    <div class="mobile-topbar-right">
+        <div class="mobile-avatar" id="mobile-avatar">?</div>
+    </div>
+</header>
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<nav class="mobile-nav">
+    <button type="button" class="mobile-nav-item active" data-view="calendar" onclick="showView('calendar')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span data-i18n="nav_schedule">Schedule</span>
+    </button>
+    <button type="button" class="mobile-nav-item" data-view="requests" onclick="showView('requests')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+        <span data-i18n="nav_requests">Requests</span>
+        <span class="notif-badge" id="mob-requests-badge" style="display:none">0</span>
+    </button>
+    <button type="button" class="mobile-nav-item" data-view="announcements" onclick="showView('announcements')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <span data-i18n="nav_announcements">Announcements</span>
+        <span class="notif-badge" id="mob-announcements-badge" style="display:none">0</span>
+    </button>
+    <button type="button" class="mobile-nav-item" data-view="notifications" onclick="showView('notifications')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span data-i18n="nav_notifications">Notifications</span>
+        <span class="notif-badge" id="mob-notif-count" style="display:none">0</span>
+    </button>
+    <button type="button" class="mobile-nav-item" onclick="toggleMobileMore()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <span data-i18n="nav_more">More</span>
+    </button>
+</nav>
+
+<!-- ── MOBILE MORE DRAWER ── -->
+<div class="mobile-more-overlay" id="mobile-more-overlay" onclick="closeMobileMore()">
+    <div class="mobile-more-sheet" onclick="event.stopPropagation()">
+        <div class="mobile-more-user">
+            <div class="mobile-more-avatar" id="mobile-more-avatar">?</div>
+            <div>
+                <div class="mobile-more-name" id="mobile-more-name"></div>
+                <div class="mobile-more-role" id="mobile-more-role"></div>
+            </div>
+        </div>
+        <div class="mobile-more-items">
+            <button type="button" class="mobile-more-item manager-only" data-view="employees" onclick="showView('employees'); closeMobileMore()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span data-i18n="nav_employees">Employees</span>
+            </button>
+            <button type="button" class="mobile-more-item manager-only" data-view="stats" onclick="showView('stats'); closeMobileMore()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span data-i18n="nav_statistics">Statistics</span>
+            </button>
+            <button type="button" class="mobile-more-item" onclick="openSettings(); closeMobileMore()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span data-i18n="nav_settings">Settings</span>
+            </button>
+            <button type="button" class="mobile-more-item mobile-more-logout" onclick="logout()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span data-i18n="nav_logout">Logout</span>
+            </button>
+        </div>
+    </div>
+</div>
 
 <div class="app-layout">
 
     <!-- ── SIDEBAR ── -->
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <span class="brand-icon">⬡</span>
-            <span>GrafikApp</span>
+            <img src="assets/images/logo.png" alt="SharkFlow" class="sidebar-logo-img">
         </div>
 
         <button type="button" class="nav-item active" data-view="calendar" onclick="showView('calendar')">
-            <span class="nav-icon">📅</span> Schedule
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span data-i18n="nav_schedule">Schedule</span>
         </button>
         <button type="button" class="nav-item" data-view="employees" onclick="showView('employees')" id="nav-employees">
-            <span class="nav-icon">👥</span> Employees
-        </button>
-        <button type="button" class="nav-item manager-only" data-view="positions" onclick="showView('positions')" id="nav-positions">
-            <span class="nav-icon">🏷️</span> Positions
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span data-i18n="nav_employees">Employees</span>
         </button>
         <button type="button" class="nav-item" data-view="requests" onclick="showView('requests')">
-            <span class="nav-icon">📋</span> Requests
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            <span data-i18n="nav_requests">Requests</span>
             <span class="notif-badge" id="requests-badge" style="display:none">0</span>
         </button>
         <button type="button" class="nav-item" data-view="announcements" onclick="showView('announcements')">
-            <span class="nav-icon">📢</span> Announcements
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <span data-i18n="nav_announcements">Announcements</span>
             <span class="notif-badge" id="announcements-badge" style="display:none">0</span>
         </button>
         <button type="button" class="nav-item" data-view="notifications" onclick="showView('notifications')">
-            <span class="nav-icon">🔔</span> Notifications
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span data-i18n="nav_notifications">Notifications</span>
             <span class="notif-badge" id="notif-count" style="display:none">0</span>
         </button>
         <button type="button" class="nav-item" data-view="stats" onclick="showView('stats')" id="nav-stats">
-            <span class="nav-icon">📊</span> Statistics
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span data-i18n="nav_statistics">Statistics</span>
         </button>
 
         <div class="sidebar-spacer"></div>
 
-        <div style="padding: 12px 14px; font-size:13px; color: var(--text-muted);">
-            <div id="user-name" style="color: var(--text); font-weight:600;"></div>
-            <div id="user-role"></div>
+        <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="user-name"></div>
+                <div class="sidebar-user-role" id="user-role"></div>
+            </div>
         </div>
 
+        <button type="button" class="nav-item" onclick="openSettings()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span data-i18n="nav_settings">Settings</span>
+        </button>
         <button type="button" class="nav-item logout-btn" onclick="logout()">
-            <span class="nav-icon"></span> Logout
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span data-i18n="nav_logout">Logout</span>
         </button>
     </aside>
 
@@ -62,130 +138,138 @@
         <!-- VIEW: SCHEDULE -->
         <div id="view-calendar">
             <div class="page-header">
-                <h1 class="page-title">Monthly Schedule</h1>
-                <button type="button" class="btn-primary manager-only" onclick="openAddShiftModal()" style="width:auto; padding: 10px 20px;">
-                    + Add Shift
-                </button>
+                <h1 class="page-title" data-i18n="title_schedule">Schedule</h1>
             </div>
-            <div id="dept-tabs" class="dept-tabs"></div>
-            <div class="card">
-                <div class="calendar-nav">
-                    <button type="button" class="btn-secondary" onclick="changeMonth(-1)">← Previous</button>
-                    <h2 id="calendar-title"></h2>
-                    <button type="button" class="btn-secondary" onclick="changeMonth(1)">Next →</button>
+
+            <!-- Stats bar (manager only) -->
+            <div class="schedule-stats manager-only" id="schedule-stats">
+                <div class="sstat-card">
+                    <div class="sstat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div>
+                        <div class="sstat-value" id="stat-total-hours">—</div>
+                        <div class="sstat-label" data-i18n="stats_total_hours">Total Hours</div>
+                    </div>
                 </div>
-                <div class="calendar-grid" id="calendar-grid"></div>
+                <div class="sstat-card">
+                    <div class="sstat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <div>
+                        <div class="sstat-value" id="stat-employee-count">—</div>
+                        <div class="sstat-label" data-i18n="stats_employees_count">Employees</div>
+                    </div>
+                </div>
+                <div class="sstat-card">
+                    <div class="sstat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </div>
+                    <div>
+                        <div class="sstat-value" id="stat-avg-hours">—</div>
+                        <div class="sstat-label" data-i18n="stats_avg_hours">Avg. hours / employee</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls: toggle + navigation -->
+            <div class="calendar-controls">
+                <div class="view-toggle">
+                    <button type="button" class="view-toggle-btn active" data-view="month" onclick="toggleCalendarView('month')" data-i18n="btn_month_view">Month</button>
+                    <button type="button" class="view-toggle-btn" data-view="week" onclick="toggleCalendarView('week')" data-i18n="btn_week_view">Week</button>
+                </div>
+                <div class="calendar-nav-inner">
+                    <button type="button" class="btn-secondary" onclick="calNav(-1)" data-i18n="btn_previous">← Previous</button>
+                    <h2 id="calendar-title"></h2>
+                    <button type="button" class="btn-secondary" onclick="calNav(1)" data-i18n="btn_next">Next →</button>
+                </div>
+                <button type="button" class="btn-primary manager-only" onclick="openAddShiftModal()" style="width:auto; padding:10px 20px; margin-left:auto;" data-i18n="btn_add_shift">+ Add Shift</button>
+            </div>
+
+            <div id="dept-tabs" class="dept-tabs"></div>
+
+            <!-- Monthly view -->
+            <div id="view-monthly">
+                <div class="card">
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                </div>
+            </div>
+
+            <!-- Weekly view -->
+            <div id="view-weekly" style="display:none">
+                <div class="card wk-card">
+                    <div id="weekly-grid" class="weekly-grid"></div>
+                </div>
             </div>
         </div>
 
         <!-- VIEW: EMPLOYEES (manager only) -->
         <div id="view-employees" style="display:none">
             <div class="page-header">
-                <h1 class="page-title">Employees</h1>
-                <button type="button" class="btn-primary" onclick="openAddEmployeeModal()" style="width:auto; padding: 10px 20px;">
-                    + Add Employee
-                </button>
+                <h1 class="page-title" data-i18n="title_employees">Employees</h1>
+                <div style="display:flex;gap:10px;align-items:center">
+                    <button type="button" class="btn-secondary" onclick="openManageModal('departments')" style="padding:10px 16px;display:flex;align-items:center;gap:8px">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span data-i18n="btn_manage">Manage</span>
+                    </button>
+                    <button type="button" class="btn-primary" onclick="openAddEmployeeModal()" style="width:auto; padding: 10px 20px;" data-i18n="btn_add_employee">+ Add Employee</button>
+                </div>
             </div>
             <div class="card">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Full Name</th>
-                            <th>Email</th>
-                            <th>System Role</th>
-                            <th>Job Role</th>
-                            <th>Actions</th>
+                            <th data-i18n="th_full_name">Full Name</th>
+                            <th data-i18n="th_email">Email</th>
+                            <th data-i18n="th_phone">Phone</th>
+                            <th data-i18n="th_department">Department</th>
+                            <th data-i18n="th_system_role">System Role</th>
+                            <th data-i18n="th_job_role">Job Role</th>
+                            <th data-i18n="th_actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="employees-tbody"></tbody>
                 </table>
             </div>
-            <div class="card" style="margin-top:24px">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-                    <h3 style="margin:0; font-family:'Syne',sans-serif; font-size:16px;">Job Roles</h3>
-                    <button type="button" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px" onclick="openAddLabelModal()">+ Add Role</button>
-                </div>
-                <div id="job-roles-list"></div>
-            </div>
-            <div class="card" style="margin-top:24px">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
-                    <h3 style="margin:0; font-family:'Syne',sans-serif; font-size:16px;">Departments</h3>
-                </div>
-                <div id="departments-list" style="margin-bottom:16px"></div>
-                <div style="display:flex; gap:10px; align-items:center">
-                    <input type="text" id="new-dept-name" placeholder="Department name" style="flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none;">
-                    <button type="button" class="btn-primary" style="width:auto; padding:10px 18px; font-size:13px; flex-shrink:0" onclick="saveDepartment()">+ Add</button>
-                </div>
-            </div>
         </div>
 
-        <!-- VIEW: POSITIONS (manager only) -->
-        <div id="view-positions" style="display:none">
-            <div class="page-header">
-                <h1 class="page-title">Positions</h1>
-                <button type="button" class="btn-primary" onclick="openAddPositionModal()" style="width:auto; padding: 10px 20px;">
-                    + Add Position
-                </button>
-            </div>
-            <div class="card">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Position Name</th>
-                            <th>Color</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="positions-tbody"></tbody>
-                </table>
-            </div>
-        </div>
+        <!-- VIEW: POSITIONS (managed via Manage modal) -->
+        <div id="view-positions" style="display:none"></div>
 
         <!-- VIEW: REQUESTS -->
         <div id="view-requests" style="display:none">
             <div class="page-header">
-                <h1 class="page-title">Requests</h1>
-                <button type="button" class="btn-primary employee-only" onclick="openAddRequestModal()" style="width:auto; padding: 10px 20px;">
-                    + Submit Request
-                </button>
+                <h1 class="page-title" data-i18n="title_requests">Requests</h1>
+                <button type="button" class="btn-primary employee-only" onclick="openAddRequestModal()" style="width:auto; padding: 10px 20px;" data-i18n="btn_submit_request">+ Submit Request</button>
             </div>
             <div class="card">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th>Type</th>
-                            <th>From</th>
-                            <th>To</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="requests-tbody"></tbody>
-                </table>
+                <div id="requests-list"></div>
             </div>
         </div>
 
         <!-- VIEW: ANNOUNCEMENTS -->
         <div id="view-announcements" style="display:none">
             <div class="page-header">
-                <h1 class="page-title">Announcements</h1>
-                <button type="button" class="btn-primary manager-only" onclick="openAddAnnouncementModal()" style="width:auto; padding:10px 20px;">
-                    + Add Announcement
-                </button>
+                <h1 class="page-title" data-i18n="title_announcements">Announcements</h1>
+                <button type="button" class="btn-primary manager-only" onclick="openAddAnnouncementModal()" style="width:auto; padding:10px 20px;" data-i18n="btn_add_announcement">+ Add Announcement</button>
             </div>
-            <div id="announcements-list"></div>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 style="margin:0;" data-i18n="section_announcements">Announcements</h3>
+                </div>
+                <div id="announcements-list"></div>
+            </div>
         </div>
 
         <!-- VIEW: NOTIFICATIONS -->
         <div id="view-notifications" style="display:none">
             <div class="page-header">
-                <h1 class="page-title">Notifications</h1>
+                <h1 class="page-title" data-i18n="title_notifications">Notifications</h1>
             </div>
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0;">Your Notifications</h3>
-                    <button type="button" id="mark-all-read-btn" style="display: none; padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Mark All as Read</button>
+                    <h3 style="margin: 0;" data-i18n="section_your_notifications">Your Notifications</h3>
+                    <button type="button" id="mark-all-read-btn" style="display: none; padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;" data-i18n="btn_mark_all_read">Mark All as Read</button>
                 </div>
                 <div id="notifications-list"></div>
             </div>
@@ -194,7 +278,8 @@
         <!-- VIEW: STATISTICS (manager only) -->
         <div id="view-stats" style="display:none">
             <div class="page-header">
-                <h1 class="page-title">Statistics</h1>
+                <h1 class="page-title" data-i18n="title_statistics">Statistics</h1>
+                <button type="button" class="btn-secondary" onclick="openDetailedStats()" data-i18n="btn_detailed_stats">Detailed Stats</button>
             </div>
             <div class="stats-grid" id="stats-grid"></div>
         </div>
@@ -202,29 +287,104 @@
     </main>
 </div>
 
+<!-- ── MODAL: MANAGE (Job Roles / Departments / Positions) ── -->
+<div class="modal-overlay" id="modal-manage">
+    <div class="modal modal-wide">
+        <div class="modal-header">
+            <h2 class="modal-title" data-i18n="modal_manage">Manage</h2>
+            <button type="button" class="modal-close" onclick="closeModal('modal-manage')">×</button>
+        </div>
+        <div class="manage-tabs">
+            <button type="button" class="manage-tab active" data-tab="departments" onclick="switchManageTab('departments')" data-i18n="tab_departments">Departments</button>
+            <button type="button" class="manage-tab" data-tab="roles" onclick="switchManageTab('roles')" data-i18n="tab_job_roles">Job Roles</button>
+            <button type="button" class="manage-tab" data-tab="positions" onclick="switchManageTab('positions')" data-i18n="tab_positions">Positions</button>
+        </div>
+        <!-- Tab: Departments -->
+        <div class="manage-tab-content" id="manage-tab-departments">
+            <div class="manage-add-panel">
+                <p class="manage-panel-label" data-i18n="section_departments">Departments</p>
+                <p style="font-size:12px;color:var(--text-muted);line-height:1.5" data-i18n="manage_depts_hint">Group employees into departments.</p>
+                <button type="button" class="btn-primary" style="width:100%;margin-top:auto" onclick="openAddDepartmentModal()" data-i18n="btn_add_dept">+ Add Department</button>
+            </div>
+            <div class="manage-list-panel">
+                <div id="departments-list"></div>
+            </div>
+        </div>
+        <!-- Tab: Job Roles -->
+        <div class="manage-tab-content" id="manage-tab-roles" style="display:none">
+            <div class="manage-add-panel">
+                <p class="manage-panel-label" data-i18n="section_job_roles">Job Roles</p>
+                <p style="font-size:12px;color:var(--text-muted);line-height:1.5" data-i18n="manage_roles_hint">Create color-coded roles to tag employees.</p>
+                <button type="button" class="btn-primary" style="width:100%;margin-top:auto" onclick="openAddLabelModal()" data-i18n="btn_add_role">+ Add Role</button>
+            </div>
+            <div class="manage-list-panel">
+                <div id="job-roles-list"></div>
+            </div>
+        </div>
+        <!-- Tab: Positions -->
+        <div class="manage-tab-content" id="manage-tab-positions" style="display:none">
+            <div class="manage-add-panel">
+                <p class="manage-panel-label" data-i18n="nav_positions">Positions</p>
+                <p style="font-size:12px;color:var(--text-muted);line-height:1.5" data-i18n="manage_positions_hint">Define shift positions with custom colors.</p>
+                <button type="button" class="btn-primary" style="width:100%;margin-top:auto" onclick="openAddPositionModal()" data-i18n="btn_add_position">+ Add Position</button>
+            </div>
+            <div class="manage-list-panel">
+                <table class="table">
+                    <thead><tr>
+                        <th data-i18n="th_position_name">Position Name</th>
+                        <th data-i18n="th_color">Color</th>
+                        <th data-i18n="th_actions">Actions</th>
+                    </tr></thead>
+                    <tbody id="positions-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-manage')" data-i18n="btn_close">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: DETAILED STATS ── -->
+<div class="modal-overlay" id="modal-detailed-stats">
+    <div class="modal modal-wide">
+        <div class="modal-header">
+            <h2 class="modal-title" data-i18n="modal_detailed_stats">Detailed Statistics</h2>
+            <button type="button" class="modal-close" onclick="closeModal('modal-detailed-stats')">×</button>
+        </div>
+        <div id="detailed-stats-content"></div>
+    </div>
+</div>
+
 <!-- ── MODAL: ADD SHIFT ── -->
 <div class="modal-overlay" id="modal-shift">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">Add Shift</h2>
+            <h2 class="modal-title" data-i18n="modal_add_shift">Add Shift</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-shift')">×</button>
         </div>
+        <div class="shift-tabs">
+            <button type="button" class="shift-tab active" data-tab="single" onclick="switchShiftTab('single')" data-i18n="tab_single_shift">Single Shift</button>
+            <button type="button" class="shift-tab" data-tab="recurring" onclick="switchShiftTab('recurring')" data-i18n="tab_recurring_shift">Recurring Shift</button>
+        </div>
+        <!-- Tab: Single Shift -->
+        <div id="shift-tab-single">
         <form onsubmit="return false">
         <div class="form-group">
-            <label>Employee</label>
-            <select id="shift-user"></select>
+            <label data-i18n="label_employee">Employee</label>
+            <div class="cs-wrap" id="cs-shift-user"></div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Date</label>
+            <label data-i18n="label_date">Date</label>
             <div class="dp-input-wrap">
-                <input type="text" id="shift-date" class="dp-input" placeholder="Select date" readonly onclick="openDatepicker('shift-date', this)">
+                <input type="text" id="shift-date" class="dp-input" data-i18n-placeholder="ph_select_date" placeholder="Select date" readonly onclick="openDatepicker('shift-date', this)">
                 <button type="button" class="dp-trigger" onclick="openDatepicker('shift-date', this)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </button>
             </div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Start Time</label>
+            <label data-i18n="label_start_time">Start Time</label>
             <div class="dp-input-wrap">
                 <input type="text" id="shift-start" class="dp-input" placeholder="HH:MM" readonly onclick="openTimepicker('shift-start', this)">
                 <button type="button" class="dp-trigger" onclick="openTimepicker('shift-start', this)">
@@ -233,7 +393,7 @@
             </div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>End Time</label>
+            <label data-i18n="label_end_time">End Time</label>
             <div class="dp-input-wrap">
                 <input type="text" id="shift-end" class="dp-input" placeholder="HH:MM" readonly onclick="openTimepicker('shift-end', this)">
                 <button type="button" class="dp-trigger" onclick="openTimepicker('shift-end', this)">
@@ -242,18 +402,71 @@
             </div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Position (optional)</label>
-            <select id="shift-position"></select>
+            <label data-i18n="label_position_optional">Position (optional)</label>
+            <div class="cs-wrap" id="cs-shift-position"></div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Note (optional)</label>
-            <input type="text" id="shift-note" placeholder="e.g. Morning shift">
+            <label data-i18n="label_note_optional">Note (optional)</label>
+            <input type="text" id="shift-note" data-i18n-placeholder="ph_morning_shift" placeholder="e.g. Morning shift">
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-shift')">Cancel</button>
-            <button type="button" class="btn-primary" style="width:auto" onclick="saveShift()">Save</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-shift')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveShift()" data-i18n="btn_save">Save</button>
         </div>
         </form>
+        </div>
+        <!-- Tab: Recurring Shift -->
+        <div id="shift-tab-recurring" style="display:none">
+        <form onsubmit="return false">
+        <div class="form-group">
+            <label data-i18n="label_employee">Employee</label>
+            <div class="cs-wrap" id="cs-recur-user"></div>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_start_time">Start Time</label>
+            <div class="dp-input-wrap">
+                <input type="text" id="recur-start" class="dp-input" placeholder="HH:MM" readonly onclick="openTimepicker('recur-start', this)">
+                <button type="button" class="dp-trigger" onclick="openTimepicker('recur-start', this)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_end_time">End Time</label>
+            <div class="dp-input-wrap">
+                <input type="text" id="recur-end" class="dp-input" placeholder="HH:MM" readonly onclick="openTimepicker('recur-end', this)">
+                <button type="button" class="dp-trigger" onclick="openTimepicker('recur-end', this)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_position_optional">Position (optional)</label>
+            <div class="cs-wrap" id="cs-recur-position"></div>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_note_optional">Note (optional)</label>
+            <input type="text" id="recur-note" data-i18n-placeholder="ph_morning_shift" placeholder="e.g. Morning shift">
+        </div>
+        <div class="recur-cal-section">
+            <p class="recur-section-label" data-i18n="label_select_days">Select Days</p>
+            <div class="recur-cal-header">
+                <button type="button" class="recur-cal-nav" onclick="recurCalNav(-1)">&#8249;</button>
+                <span class="recur-cal-title" id="recur-cal-title"></span>
+                <button type="button" class="recur-cal-nav" onclick="recurCalNav(1)">&#8250;</button>
+            </div>
+            <div class="recur-cal-weekdays">
+                <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+            </div>
+            <div class="recur-cal-grid" id="recur-cal-grid"></div>
+            <div class="recur-selected-count" id="recur-selected-count"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-shift')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveRecurringShifts()" data-i18n="btn_create_shifts">Create Shifts</button>
+        </div>
+        </form>
+        </div>
     </div>
 </div>
 
@@ -261,39 +474,103 @@
 <div class="modal-overlay" id="modal-employee">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">Add Employee</h2>
+            <h2 class="modal-title" data-i18n="modal_add_employee">Add Employee</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-employee')">×</button>
         </div>
         <form onsubmit="return false">
         <div class="form-group">
-            <label>Full Name</label>
+            <label data-i18n="label_full_name">Full Name</label>
             <input type="text" id="emp-name" placeholder="John Doe">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Email</label>
+            <label data-i18n="label_email">Email</label>
             <input type="email" id="emp-email" placeholder="john@company.com">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Password</label>
+            <label data-i18n="label_password">Password</label>
             <input type="password" id="emp-password" placeholder="••••••••">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Department</label>
+            <label data-i18n="label_phone">Phone</label>
+            <input type="tel" id="emp-phone" data-i18n-placeholder="ph_phone" placeholder="+48 000 000 000">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_department">Department</label>
             <select id="emp-department">
                 <option value="">No department</option>
             </select>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Job Role</label>
+            <label data-i18n="label_job_role">Job Role</label>
             <select id="emp-label">
                 <option value="">No role</option>
             </select>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-employee')">Cancel</button>
-            <button type="button" class="btn-primary" style="width:auto" onclick="saveEmployee()">Save</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-employee')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveEmployee()" data-i18n="btn_save">Save</button>
         </div>
         </form>
+    </div>
+</div>
+
+<!-- ── MODAL: SETTINGS ── -->
+<div class="modal-overlay" id="modal-settings">
+    <div class="modal modal-settings">
+        <div class="modal-header">
+            <h2 class="modal-title" data-i18n="modal_settings">⚙️ Settings</h2>
+            <button type="button" class="modal-close" onclick="closeModal('modal-settings')">×</button>
+        </div>
+        <form onsubmit="return false">
+            <div class="form-group">
+                <label data-i18n="label_language">Language</label>
+                <div class="lang-picker" id="lang-picker">
+                    <button type="button" class="lang-option" data-lang="en" onclick="selectLangOption('en')">
+                        <svg class="lang-flag" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="60" height="40" fill="#012169"/>
+                            <path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="8"/>
+                            <path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="5"/>
+                            <path d="M30,0 V40 M0,20 H60" stroke="#fff" stroke-width="12"/>
+                            <path d="M30,0 V40 M0,20 H60" stroke="#C8102E" stroke-width="8"/>
+                        </svg>
+                        <span class="lang-name">English</span>
+                    </button>
+                    <button type="button" class="lang-option" data-lang="pl" onclick="selectLangOption('pl')">
+                        <svg class="lang-flag" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="60" height="20" fill="#fff"/>
+                            <rect y="20" width="60" height="20" fill="#DC143C"/>
+                        </svg>
+                        <span class="lang-name">Polski</span>
+                    </button>
+                </div>
+            </div>
+            <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px">
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px" data-i18n="label_profile">Profile</p>
+                <div class="form-group">
+                    <label data-i18n="label_full_name">Full Name</label>
+                    <input type="text" id="settings-name" placeholder="John Doe">
+                </div>
+                <div class="form-group" style="margin-top:14px">
+                    <label data-i18n="label_email">Email</label>
+                    <input type="email" id="settings-email" placeholder="email@example.com">
+                </div>
+            </div>
+            <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px">
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px" data-i18n="label_change_password">Change Password</p>
+                <div class="form-group">
+                    <label data-i18n="label_new_password">New Password</label>
+                    <input type="password" id="settings-password" placeholder="••••••••" autocomplete="new-password">
+                </div>
+                <div class="form-group" style="margin-top:14px">
+                    <label data-i18n="label_confirm_password">Confirm New Password</label>
+                    <input type="password" id="settings-password-confirm" placeholder="••••••••" autocomplete="new-password">
+                </div>
+            </div>
+        </form>
+        <div class="modal-footer" style="border-top:1px solid var(--border);margin-top:0;padding-top:20px">
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-settings')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveSettings()" data-i18n="btn_save_changes">Save Changes</button>
+        </div>
     </div>
 </div>
 
@@ -301,37 +578,42 @@
 <div class="modal-overlay" id="modal-edit-employee">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">Edit Employee</h2>
+            <h2 class="modal-title" data-i18n="modal_edit_employee">Edit Employee</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-edit-employee')">×</button>
         </div>
         <form onsubmit="return false">
         <input type="hidden" id="edit-emp-id">
         <div class="form-group">
-            <label>Full Name</label>
+            <label data-i18n="label_full_name">Full Name</label>
             <input type="text" id="edit-emp-name" placeholder="John Doe">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>System Role</label>
-            <select id="edit-emp-role">
-                <option value="employee">Employee</option>
-                <option value="manager">Manager</option>
-            </select>
+            <label data-i18n="label_email">Email</label>
+            <input type="email" id="edit-emp-email" placeholder="email@example.com">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Department</label>
-            <select id="edit-emp-department">
-                <option value="">No department</option>
-            </select>
+            <label data-i18n="label_new_password">New Password</label>
+            <input type="password" id="edit-emp-password" placeholder="••••••••" autocomplete="new-password">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Job Role</label>
-            <select id="edit-emp-label">
-                <option value="">No role</option>
-            </select>
+            <label data-i18n="label_phone">Phone</label>
+            <input type="tel" id="edit-emp-phone" data-i18n-placeholder="ph_phone" placeholder="+48 000 000 000">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_department">Department</label>
+            <div class="cs-wrap" id="cs-edit-department"></div>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_job_role">Job Role</label>
+            <div class="cs-wrap" id="cs-edit-label"></div>
+        </div>
+        <div class="form-group" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+            <label data-i18n="label_app_permissions">App Permissions</label>
+            <div class="cs-wrap" id="cs-edit-role"></div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-employee')">Cancel</button>
-            <button type="button" class="btn-primary" style="width:auto" onclick="saveEditEmployee()">Save</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-employee')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveEditEmployee()" data-i18n="btn_save">Save</button>
         </div>
         </form>
     </div>
@@ -341,12 +623,12 @@
 <div class="modal-overlay" id="modal-readers">
     <div class="modal" style="max-width:400px">
         <div class="modal-header">
-            <h2 class="modal-title">Seen by</h2>
+            <h2 class="modal-title" data-i18n="modal_seen_by">Seen by</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-readers')">×</button>
         </div>
         <div id="readers-list" style="max-height:340px; overflow-y:auto;"></div>
         <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-readers')">Close</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-readers')" data-i18n="btn_close">Close</button>
         </div>
     </div>
 </div>
@@ -355,27 +637,25 @@
 <div class="modal-overlay" id="modal-announcement">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">New Announcement</h2>
+            <h2 class="modal-title" data-i18n="modal_new_announcement">New Announcement</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-announcement')">×</button>
         </div>
         <form onsubmit="return false">
         <div class="form-group">
-            <label>Title</label>
-            <input type="text" id="ann-title" placeholder="e.g. Schedule change next week">
+            <label data-i18n="label_title">Title</label>
+            <input type="text" id="ann-title" data-i18n-placeholder="ph_ann_title" placeholder="e.g. Schedule change next week">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Content</label>
-            <textarea id="ann-content" rows="5" placeholder="Write your announcement..."></textarea>
+            <label data-i18n="label_content">Content</label>
+            <textarea id="ann-content" rows="5" data-i18n-placeholder="ph_ann_content" placeholder="Write your announcement..."></textarea>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Recipients</label>
-            <select id="ann-department">
-                <option value="">All Departments</option>
-            </select>
+            <label data-i18n="label_recipients">Recipients</label>
+            <div class="cs-wrap" id="cs-ann-department"></div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-announcement')">Cancel</button>
-            <button type="button" class="btn-primary" style="width:auto" onclick="saveAnnouncement()">Publish</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-announcement')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveAnnouncement()" data-i18n="btn_publish">Publish</button>
         </div>
         </form>
     </div>
@@ -385,22 +665,74 @@
 <div class="modal-overlay" id="modal-label">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">Add Job Role</h2>
+            <h2 class="modal-title" data-i18n="modal_add_job_role">Add Job Role</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-label')">×</button>
         </div>
         <form onsubmit="return false">
         <div class="form-group">
-            <label>Role Name</label>
-            <input type="text" id="label-name" placeholder="e.g. Head Chef, Waiter">
+            <label data-i18n="label_role_name">Role Name</label>
+            <input type="text" id="label-name" data-i18n-placeholder="ph_role_name" placeholder="e.g. Head Chef, Waiter">
         </div>
-        <div class="form-group" style="margin-top:16px">
-            <label>Color</label>
+        <div style="display:none">
             <div class="color-swatch-picker" id="label-color-picker"></div>
             <input type="hidden" id="label-color" value="#3B82F6">
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-label')">Cancel</button>
-            <button type="button" class="btn-primary" style="width:auto" onclick="saveLabel()">Save</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-label')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveLabel()" data-i18n="btn_save">Save</button>
+        </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── MODAL: ADD DEPARTMENT ── -->
+<div class="modal-overlay" id="modal-department">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title" data-i18n="modal_add_dept">Add Department</h2>
+            <button type="button" class="modal-close" onclick="closeModal('modal-department')">×</button>
+        </div>
+        <form onsubmit="return false">
+        <div class="form-group">
+            <label data-i18n="section_departments">Department Name</label>
+            <input type="text" id="dept-name" data-i18n-placeholder="ph_dept_name" placeholder="Department name"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();saveDepartment()}">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_color">Color</label>
+            <div class="color-swatch-picker" id="dept-color-picker"></div>
+            <input type="hidden" id="dept-color" value="#3B82F6">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-department')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveDepartment()" data-i18n="btn_save">Save</button>
+        </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── MODAL: EDIT DEPARTMENT ── -->
+<div class="modal-overlay" id="modal-edit-department">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title" data-i18n="modal_edit_dept">Edit Department</h2>
+            <button type="button" class="modal-close" onclick="closeModal('modal-edit-department')">×</button>
+        </div>
+        <form onsubmit="return false">
+        <input type="hidden" id="edit-dept-id">
+        <div class="form-group">
+            <label data-i18n="section_departments">Department Name</label>
+            <input type="text" id="edit-dept-name" data-i18n-placeholder="ph_dept_name" placeholder="Department name"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();saveEditDepartment()}">
+        </div>
+        <div class="form-group" style="margin-top:16px">
+            <label data-i18n="label_color">Color</label>
+            <div class="color-swatch-picker" id="edit-dept-color-picker"></div>
+            <input type="hidden" id="edit-dept-color" value="#3B82F6">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-department')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveEditDepartment()" data-i18n="btn_save">Save</button>
         </div>
         </form>
     </div>
@@ -416,17 +748,17 @@
         <form onsubmit="return false">
         <input type="hidden" id="position-id">
         <div class="form-group">
-            <label>Position Name</label>
-            <input type="text" id="position-name" placeholder="e.g. Kitchen, Dishwasher">
+            <label data-i18n="label_position_name">Position Name</label>
+            <input type="text" id="position-name" data-i18n-placeholder="ph_position_name" placeholder="e.g. Kitchen, Dishwasher">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Color</label>
+            <label data-i18n="label_color">Color</label>
             <div class="color-swatch-picker" id="position-color-picker"></div>
             <input type="hidden" id="position-color" value="#6C63FF">
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-position')">Cancel</button>
-            <button type="button" class="btn-primary" style="width:auto" onclick="savePosition()">Save</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-position')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="savePosition()" data-i18n="btn_save">Save</button>
         </div>
         </form>
     </div>
@@ -436,42 +768,63 @@
 <div class="modal-overlay" id="modal-request">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">Submit Request</h2>
+            <h2 class="modal-title" data-i18n="modal_submit_request">Submit Request</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-request')">×</button>
         </div>
         <form onsubmit="return false">
         <div class="form-group">
-            <label>Request Type</label>
-            <select id="req-type">
-                <option value="urlop">Time Off</option>
-                <option value="zamiana">Shift Swap</option>
-            </select>
+            <label data-i18n="label_request_type">Request Type</label>
+            <div class="cs-wrap" id="cs-req-type"></div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>From</label>
+            <label data-i18n="label_from">From</label>
             <div class="dp-input-wrap">
-                <input type="text" id="req-from" class="dp-input" placeholder="Select date" readonly onclick="openDatepicker('req-from', this)">
+                <input type="text" id="req-from" class="dp-input" placeholder="YYYY-MM-DD" readonly onclick="openDatepicker('req-from', this)">
                 <button type="button" class="dp-trigger" onclick="openDatepicker('req-from', this)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </button>
             </div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>To</label>
+            <label data-i18n="label_to">To</label>
             <div class="dp-input-wrap">
-                <input type="text" id="req-to" class="dp-input" placeholder="Select date" readonly onclick="openDatepicker('req-to', this)">
+                <input type="text" id="req-to" class="dp-input" placeholder="YYYY-MM-DD" readonly onclick="openDatepicker('req-to', this)">
                 <button type="button" class="dp-trigger" onclick="openDatepicker('req-to', this)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </button>
             </div>
         </div>
+        <div id="req-time-section" style="display:none; margin-top:16px">
+            <div class="req-time-label" data-i18n="label_shift_hours">Shift Hours</div>
+            <div class="req-time-row">
+                <div class="form-group">
+                    <label data-i18n="label_time_from">From time</label>
+                    <div class="dp-input-wrap">
+                        <input type="text" id="req-time-from" class="dp-input" placeholder="HH:MM" readonly onclick="openTimepicker('req-time-from', this)">
+                        <button type="button" class="dp-trigger" onclick="openTimepicker('req-time-from', this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="req-time-arrow">→</div>
+                <div class="form-group">
+                    <label data-i18n="label_time_to">To time</label>
+                    <div class="dp-input-wrap">
+                        <input type="text" id="req-time-to" class="dp-input" placeholder="HH:MM" readonly onclick="openTimepicker('req-time-to', this)">
+                        <button type="button" class="dp-trigger" onclick="openTimepicker('req-time-to', this)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Reason</label>
-            <textarea id="req-message" rows="3" placeholder="Describe the reason for your request..."></textarea>
+            <label data-i18n="label_reason">Reason <span style="color:var(--text-muted);font-weight:400;font-size:12px">(optional)</span></label>
+            <textarea id="req-message" rows="3" data-i18n-placeholder="ph_reason" placeholder="Describe the reason for your request..."></textarea>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-request')">Cancel</button>
-            <button type="button" class="btn-primary" style="width:auto" onclick="saveRequest()">Send</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-request')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="saveRequest()" data-i18n="btn_send">Send</button>
         </div>
         </form>
     </div>
@@ -479,17 +832,42 @@
 
 <!-- ── MODAL: EMPLOYEE SCHEDULE ── -->
 <div class="modal-overlay" id="modal-employee-schedule">
-    <div class="modal modal-wide">
-        <div class="modal-header">
-            <h2 class="modal-title" id="emp-sched-title">Schedule</h2>
+    <div class="modal modal-xl">
+        <div class="emp-sched-header">
+            <div class="emp-sched-identity">
+                <div class="emp-sched-avatar" id="emp-sched-avatar">?</div>
+                <div>
+                    <div class="emp-sched-name" id="emp-sched-title"></div>
+                    <div class="emp-sched-subtitle" id="emp-sched-subtitle"></div>
+                </div>
+            </div>
             <button type="button" class="modal-close" onclick="closeModal('modal-employee-schedule')">×</button>
         </div>
-        <div class="calendar-nav" style="margin-bottom:16px">
-            <button type="button" class="btn-secondary" onclick="empSchedChangeMonth(-1)">← Previous</button>
-            <span id="emp-sched-month-title" style="font-family:'Syne',sans-serif; font-size:16px; font-weight:700; min-width:160px; text-align:center;"></span>
-            <button type="button" class="btn-secondary" onclick="empSchedChangeMonth(1)">Next →</button>
+        <div id="emp-sched-stats-bar" class="emp-sched-stats-bar"></div>
+        <div class="emp-sched-nav">
+            <button type="button" class="emp-sched-nav-btn" onclick="empSchedChangeMonth(-1)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span id="emp-sched-month-title" class="emp-sched-month-title"></span>
+            <button type="button" class="emp-sched-nav-btn" onclick="empSchedChangeMonth(1)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
         </div>
-        <div class="calendar-grid" id="emp-sched-grid"></div>
+        <div class="emp-sched-grid" id="emp-sched-grid"></div>
+        <div class="emp-sched-legend">
+            <span class="emp-sched-legend-item">
+                <span class="emp-sched-legend-dot" style="background:var(--accent)"></span>
+                <span data-i18n="label_shift">Shift</span>
+            </span>
+            <span class="emp-sched-legend-item">
+                <span class="emp-sched-legend-dot" style="background:var(--success)"></span>
+                <span data-i18n="status_approved">Approved off</span>
+            </span>
+            <span class="emp-sched-legend-item">
+                <span class="emp-sched-legend-dot" style="background:var(--warning)"></span>
+                <span data-i18n="status_pending">Pending off</span>
+            </span>
+        </div>
     </div>
 </div>
 
@@ -497,13 +875,13 @@
 <div class="modal-overlay" id="modal-request-detail">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">Request Details</h2>
+            <h2 class="modal-title" data-i18n="modal_request_details">Request Details</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-request-detail')">×</button>
         </div>
         <div id="request-detail-content"></div>
         <div class="modal-footer">
             <div id="request-detail-actions" style="margin-right:auto; display:flex; gap:8px;"></div>
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-request-detail')">Close</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-request-detail')" data-i18n="btn_close">Close</button>
         </div>
     </div>
 </div>
@@ -512,16 +890,16 @@
 <div class="modal-overlay" id="modal-edit-shift">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">Edit Shift</h2>
+            <h2 class="modal-title" data-i18n="modal_edit_shift">Edit Shift</h2>
             <button type="button" class="modal-close" onclick="closeModal('modal-edit-shift')">×</button>
         </div>
         <form onsubmit="return false">
         <div class="form-group">
-            <label>Employee</label>
+            <label data-i18n="label_employee">Employee</label>
             <input type="text" id="edit-shift-user" disabled style="opacity:0.6; cursor:not-allowed;">
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Date</label>
+            <label data-i18n="label_date">Date</label>
             <div class="dp-input-wrap">
                 <input type="text" id="edit-shift-date" class="dp-input" placeholder="Select date" readonly onclick="openDatepicker('edit-shift-date', this)">
                 <button type="button" class="dp-trigger" onclick="openDatepicker('edit-shift-date', this)">
@@ -530,7 +908,7 @@
             </div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Start Time</label>
+            <label data-i18n="label_start_time">Start Time</label>
             <div class="dp-input-wrap">
                 <input type="text" id="edit-shift-start" class="dp-input" placeholder="HH:MM" readonly onclick="openTimepicker('edit-shift-start', this)">
                 <button type="button" class="dp-trigger" onclick="openTimepicker('edit-shift-start', this)">
@@ -539,7 +917,7 @@
             </div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>End Time</label>
+            <label data-i18n="label_end_time">End Time</label>
             <div class="dp-input-wrap">
                 <input type="text" id="edit-shift-end" class="dp-input" placeholder="HH:MM" readonly onclick="openTimepicker('edit-shift-end', this)">
                 <button type="button" class="dp-trigger" onclick="openTimepicker('edit-shift-end', this)">
@@ -548,17 +926,17 @@
             </div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Position (optional)</label>
-            <select id="edit-shift-position"></select>
+            <label data-i18n="label_position_optional">Position (optional)</label>
+            <div class="cs-wrap" id="cs-edit-shift-position"></div>
         </div>
         <div class="form-group" style="margin-top:16px">
-            <label>Note (optional)</label>
-            <input type="text" id="edit-shift-note" placeholder="e.g. Morning shift">
+            <label data-i18n="label_note_optional">Note (optional)</label>
+            <input type="text" id="edit-shift-note" data-i18n-placeholder="ph_morning_shift" placeholder="e.g. Morning shift">
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-danger" style="width:auto; background:var(--danger); color:white; margin-right:auto" onclick="deleteShift()" title="Delete this shift">Delete</button>
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-shift')">Cancel</button>
-            <button type="button" class="btn-primary" style="width:auto" onclick="updateShift()">Update</button>
+            <button type="button" class="btn-danger" style="width:auto; background:var(--danger); color:white; margin-right:auto" onclick="deleteShift()" data-i18n="btn_delete">Delete</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-shift')" data-i18n="btn_cancel">Cancel</button>
+            <button type="button" class="btn-primary" style="width:auto" onclick="updateShift()" data-i18n="btn_update">Update</button>
         </div>
         </form>
     </div>
@@ -573,8 +951,8 @@
         </div>
         <div id="day-modal-list" class="day-modal-list"></div>
         <div class="modal-footer">
-            <button type="button" id="day-modal-add-btn" class="btn-primary" style="width:auto">+ Add Shift</button>
-            <button type="button" class="btn-secondary" onclick="closeModal('modal-day')">Close</button>
+            <button type="button" id="day-modal-add-btn" class="btn-primary" style="width:auto" data-i18n="btn_add_shift_day">+ Add Shift</button>
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-day')" data-i18n="btn_close">Close</button>
         </div>
     </div>
 </div>
@@ -598,12 +976,12 @@
     <div class="tp-display" id="tp-display">00:00</div>
     <div class="tp-body">
         <div class="tp-col">
-            <div class="tp-col-label">Hour</div>
+            <div class="tp-col-label" data-i18n="tp_hour">Hour</div>
             <div class="tp-grid tp-grid-hours" id="tp-hours"></div>
         </div>
         <div class="tp-divider"></div>
         <div class="tp-col">
-            <div class="tp-col-label">Min</div>
+            <div class="tp-col-label" data-i18n="tp_min">Min</div>
             <div class="tp-grid tp-grid-mins" id="tp-mins"></div>
         </div>
     </div>
@@ -624,6 +1002,7 @@
 
 <!-- Script order is important — api.js must be first -->
 <script src="assets/js/api.js"></script>
+<script src="assets/js/translations.js"></script>
 <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
