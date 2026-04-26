@@ -1803,6 +1803,148 @@ h1, h2, h3, .brand-icon {
     margin-top: 8px;
 }
 
+/* ── STATS DASHBOARD ────────────────────────────────────────*/
+
+.stats-month-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stats-month-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 130px;
+    text-align: center;
+    color: var(--text);
+}
+
+.stats-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.stats-kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.stats-kpi-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.stats-kpi-card:hover { transform: translateY(-2px); }
+.stats-kpi-card:hover::before { opacity: 1; }
+
+.stats-kpi-card.kpi-blue  { border-color: rgba(59,130,246,.35); }
+.stats-kpi-card.kpi-blue::before  { background: rgba(59,130,246,.04); }
+.stats-kpi-card.kpi-blue  .stats-kpi-icon { background: rgba(59,130,246,.15); color: #3b82f6; }
+.stats-kpi-card.kpi-blue  .stats-kpi-val  { color: #3b82f6; }
+
+.stats-kpi-card.kpi-violet { border-color: rgba(139,92,246,.35); }
+.stats-kpi-card.kpi-violet::before { background: rgba(139,92,246,.04); }
+.stats-kpi-card.kpi-violet .stats-kpi-icon { background: rgba(139,92,246,.15); color: #8b5cf6; }
+.stats-kpi-card.kpi-violet .stats-kpi-val  { color: #8b5cf6; }
+
+.stats-kpi-card.kpi-teal { border-color: rgba(20,184,166,.35); }
+.stats-kpi-card.kpi-teal::before { background: rgba(20,184,166,.04); }
+.stats-kpi-card.kpi-teal .stats-kpi-icon { background: rgba(20,184,166,.15); color: #14b8a6; }
+.stats-kpi-card.kpi-teal .stats-kpi-val  { color: #14b8a6; }
+
+.stats-kpi-card.kpi-green { border-color: rgba(34,197,94,.35); }
+.stats-kpi-card.kpi-green::before { background: rgba(34,197,94,.04); }
+.stats-kpi-card.kpi-green .stats-kpi-icon { background: rgba(34,197,94,.15); color: #22c55e; }
+.stats-kpi-card.kpi-green .stats-kpi-val  { color: #22c55e; }
+
+.stats-kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.stats-kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stats-kpi-delta {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+}
+
+.stats-kpi-delta.up   { background: rgba(34,197,94,.15); color: #22c55e; }
+.stats-kpi-delta.down { background: rgba(239,68,68,.15);  color: #ef4444; }
+.stats-kpi-delta.neutral { background: var(--bg-input); color: var(--text-muted); }
+
+.stats-kpi-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stats-kpi-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.stats-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stats-chart-card {
+    padding: 20px 24px;
+}
+
+.stats-chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 16px;
+}
+
+.stats-chart-wrap {
+    position: relative;
+    height: 220px;
+}
+
+.stats-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 14px;
+}
+
 /* ── ANIMACJE ───────────────────────────────────────────────*/
 
 @keyframes fadeUp {
@@ -2640,6 +2782,9 @@ h1, h2, h3, .brand-icon {
 
     /* ── Stats grid ── */
     .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stats-kpi-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stats-charts-row { grid-template-columns: 1fr; }
+    .stats-chart-wrap { height: 180px; }
 
     /* ── Modals — bottom sheet ── */
     .modal-overlay { align-items: flex-end; padding: 0 0 64px 0; overflow-y: hidden; }

@@ -2342,40 +2342,175 @@ function renderEmpSchedCalendar() {
     }
 }
 
-// ── STATISTICS ─────────────────────────────────────────────────────────────────
+// ── STATISTICS ─────────────────────────────────────────────────────────────────────────────────
+let _statsChartBar  = null;
+let _statsChartLine = null;
+
+function _statsMonthStr(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function statsNavMonth(dir) {
+    currentDate.setMonth(currentDate.getMonth() + dir);
+    loadStats();
+}
+
+function _destroyCharts() {
+    if (_statsChartBar)  { _statsChartBar.destroy();  _statsChartBar  = null; }
+    if (_statsChartLine) { _statsChartLine.destroy(); _statsChartLine = null; }
+}
+
 async function loadStats() {
-    const month = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
-    const data = await apiFetch(`/stats/?month=${month}`);
-    const stats = Array.isArray(data) ? data : [];
+    const locale = getLang() === "pl" ? "pl-PL" : "en-US";
+    const month  = _statsMonthStr(currentDate);
+
+    document.getElementById("stats-month-label").textContent =
+        currentDate.toLocaleDateString(locale, { month: "long", year: "numeric" });
+
+    const prevDate  = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    const prevMonth = _statsMonthStr(prevDate);
+
+    const trend6 = Array.from({ length: 6 }, (_, i) => {
+        const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - (5 - i), 1);
+        return { label: d.toLocaleDateString(locale, { month: "short" }), month: _statsMonthStr(d) };
+    });
+
+    const [currData, prevData, ...trendRaw] = await Promise.all([
+        apiFetch(`/stats/?month=${month}`),
+        apiFetch(`/stats/?month=${prevMonth}`),
+        ...trend6.map(x => apiFetch(`/stats/?month=${x.month}`))
+    ]);
+
+    const stats     = Array.isArray(currData) ? currData : [];
+    const prevStats = Array.isArray(prevData) ? prevData : [];
+
+    const totalHours  = stats.reduce((s, r) => s + r.total_hours, 0);
+    const totalShifts = stats.reduce((s, r) => s + r.shifts_count, 0);
+    const activeEmps  = stats.length;
+    const avgHours    = activeEmps ? totalHours / activeEmps : 0;
+    const prevHours   = prevStats.reduce((s, r) => s + r.total_hours, 0);
+    const prevShifts  = prevStats.reduce((s, r) => s + r.shifts_count, 0);
+    const prevEmps    = prevStats.length;
+    const prevAvg     = prevEmps ? prevHours / prevEmps : 0;
+
+    function delta(curr, prev) {
+        if (prev === 0) return '<span class="stats-kpi-delta neutral">—</span>';
+        const pct  = Math.round(((curr - prev) / prev) * 100);
+        const cls  = pct >= 0 ? "up" : "down";
+        const sign = pct >= 0 ? "+" : "";
+        return `<span class="stats-kpi-delta ${cls}">${sign}${pct}%</span>`;
+    }
+
+    const SVG_CLOCK  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    const SVG_CAL    = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+    const SVG_USERS  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+    const SVG_PULSE  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>';
+
+    const kpiDefs = [
+        { cls:"kpi-blue",   icon:SVG_CLOCK, val:totalHours.toFixed(1),  suffix:"h", label:t("stats_total_hours"),    dl:delta(totalHours, prevHours)  },
+        { cls:"kpi-violet", icon:SVG_CAL,   val:totalShifts,            suffix:"",  label:t("stats_total_shifts"),   dl:delta(totalShifts, prevShifts) },
+        { cls:"kpi-teal",   icon:SVG_USERS, val:activeEmps,             suffix:"",  label:t("stats_employees_count"),dl:delta(activeEmps, prevEmps)   },
+        { cls:"kpi-green",  icon:SVG_PULSE, val:avgHours.toFixed(1),    suffix:"h", label:t("stats_avg_hours"),      dl:delta(avgHours, prevAvg)      }
+    ];
+
+    const kpiRow = document.getElementById("stats-kpi-row");
+    kpiRow.innerHTML = kpiDefs.map(k => `
+        <div class="stats-kpi-card ${k.cls}">
+            <div class="stats-kpi-header">
+                <div class="stats-kpi-icon">${k.icon}</div>
+                ${k.dl}
+            </div>
+            <div class="stats-kpi-val">${k.val}${k.suffix}</div>
+            <div class="stats-kpi-label">${k.label}</div>
+        </div>
+    `).join("");
+    staggerAnimate(Array.from(kpiRow.querySelectorAll(".stats-kpi-card")), "stagger-pop", 70);
+
+    _destroyCharts();
+    Chart.defaults.color       = "#64748b";
+    Chart.defaults.borderColor = "#1c2338";
+    Chart.defaults.font.family = "DM Sans, sans-serif";
+    Chart.defaults.font.size   = 11;
+
+    const sorted = [...stats].sort((a, b) => b.total_hours - a.total_hours).slice(0, 10);
+    const BAR_COLORS = ["#3b82f6","#6366f1","#8b5cf6","#06b6d4","#14b8a6","#10b981","#22c55e","#eab308","#f97316","#ef4444"];
+    const barCtx = document.getElementById("chart-hours-bar");
+    if (barCtx) {
+        _statsChartBar = new Chart(barCtx, {
+            type: "bar",
+            data: {
+                labels: sorted.map(s => s.user_name.split(" ")[0]),
+                datasets: [{ data: sorted.map(s => parseFloat(s.total_hours.toFixed(1))), backgroundColor: BAR_COLORS, borderRadius: 6, borderSkipped: false }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 0 } },
+                    y: { grid: { color: "rgba(28,35,56,0.8)" }, ticks: { callback: v => v + "h" }, beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    const trendHours = trendRaw.map(d => parseFloat(((Array.isArray(d) ? d : []).reduce((s, r) => s + r.total_hours, 0)).toFixed(1)));
+    const lineCtx = document.getElementById("chart-trend-line");
+    if (lineCtx) {
+        _statsChartLine = new Chart(lineCtx, {
+            type: "line",
+            data: {
+                labels: trend6.map(x => x.label),
+                datasets: [{
+                    data: trendHours,
+                    borderColor: "#3b82f6", backgroundColor: "rgba(59,130,246,0.08)",
+                    borderWidth: 2.5, pointBackgroundColor: "#3b82f6",
+                    pointBorderColor: "#0d1120", pointBorderWidth: 2,
+                    pointRadius: 4, pointHoverRadius: 6, tension: 0.4, fill: true
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: "rgba(28,35,56,0.8)" }, ticks: { callback: v => v + "h" }, beginAtZero: true }
+                }
+            }
+        });
+    }
+
     const grid = document.getElementById("stats-grid");
     grid.innerHTML = "";
-
-    stats.forEach(stat => {
-        const card = document.createElement("div");
-        card.className = "stat-card";
-        card.style.cursor = "pointer";
-        card.innerHTML = `
-            <div class="stat-value" data-target="${stat.total_hours}" data-suffix="h">0h</div>
-            <div class="stat-label">${stat.user_name}</div>
-            <div style="font-size:12px; color: var(--text-muted); margin-top:4px">
-                <span class="stat-shifts-count" data-target="${stat.shifts_count}">0</span> shifts this month
-            </div>
-            <div style="font-size:11px; color:var(--accent); margin-top:8px; opacity:0.7">View schedule →</div>
-        `;
-        card.addEventListener("click", () => openEmployeeSchedule(stat.user_id, stat.user_name));
-        grid.appendChild(card);
-    });
-
-    staggerAnimate(Array.from(grid.querySelectorAll(".stat-card")), "stagger-pop", 80);
-    grid.querySelectorAll(".stat-value").forEach(el => {
-        countUp(el, parseFloat(el.dataset.target) || 0, el.dataset.suffix || "");
-    });
-    grid.querySelectorAll(".stat-shifts-count").forEach(el => {
-        countUp(el, parseInt(el.dataset.target) || 0, "");
-    });
-
     if (stats.length === 0) {
-        grid.innerHTML = '<p style="color: var(--text-muted)">No data for this month</p>';
+        grid.innerHTML = `<p style="color:var(--text-muted)">${t("stats_no_data")}</p>`;
+    } else {
+        [...stats].sort((a, b) => b.total_hours - a.total_hours).forEach(stat => {
+            const user      = allUsers.find(u => u.id === stat.user_id);
+            const deptColor = user?.department?.color || "var(--accent)";
+            const initials  = stat.user_name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+            const card = document.createElement("div");
+            card.className = "stat-card";
+            card.innerHTML = `
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,${deptColor},${deptColor}99);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:#fff;flex-shrink:0">${initials}</div>
+                    <div>
+                        <div style="font-weight:600;font-size:14px;line-height:1.2">${stat.user_name}</div>
+                        <div style="font-size:11px;color:var(--text-muted)">${user?.department?.name || ""}</div>
+                    </div>
+                </div>
+                <div class="stat-value" data-target="${stat.total_hours}" data-suffix="h">0h</div>
+                <div class="stat-label" style="margin-top:4px">${t("stats_total_hours")}</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:4px">
+                    <span class="stat-shifts-count" data-target="${stat.shifts_count}">0</span> ${t("stats_total_shifts").toLowerCase()}
+                </div>
+                <div style="font-size:11px;color:var(--accent);margin-top:10px;opacity:0.7">${t("stats_view_schedule")} →</div>
+            `;
+            card.addEventListener("click", () => openEmployeeSchedule(stat.user_id, stat.user_name));
+            grid.appendChild(card);
+        });
+        staggerAnimate(Array.from(grid.querySelectorAll(".stat-card")), "stagger-pop", 60);
+        grid.querySelectorAll(".stat-value").forEach(el => countUp(el, parseFloat(el.dataset.target) || 0, "h"));
+        grid.querySelectorAll(".stat-shifts-count").forEach(el => countUp(el, parseInt(el.dataset.target) || 0, ""));
     }
 }
 

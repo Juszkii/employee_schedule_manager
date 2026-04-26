@@ -279,8 +279,37 @@
         <div id="view-stats" style="display:none">
             <div class="page-header">
                 <h1 class="page-title" data-i18n="title_statistics">Statistics</h1>
-                <button type="button" class="btn-secondary" onclick="openDetailedStats()" data-i18n="btn_detailed_stats">Detailed Stats</button>
+                <div style="display:flex;gap:10px;align-items:center">
+                    <div class="stats-month-nav">
+                        <button type="button" class="emp-sched-nav-btn" onclick="statsNavMonth(-1)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        <span id="stats-month-label" class="stats-month-label"></span>
+                        <button type="button" class="emp-sched-nav-btn" onclick="statsNavMonth(1)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="openDetailedStats()" data-i18n="btn_detailed_stats">Detailed Stats</button>
+                </div>
             </div>
+
+            <!-- KPI summary row -->
+            <div class="stats-kpi-row" id="stats-kpi-row"></div>
+
+            <!-- Charts row -->
+            <div class="stats-charts-row">
+                <div class="card stats-chart-card">
+                    <div class="stats-chart-title" data-i18n="stats_hours_per_emp">Hours per employee</div>
+                    <div class="stats-chart-wrap"><canvas id="chart-hours-bar"></canvas></div>
+                </div>
+                <div class="card stats-chart-card">
+                    <div class="stats-chart-title" data-i18n="stats_trend_6m">6-month trend</div>
+                    <div class="stats-chart-wrap"><canvas id="chart-trend-line"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Employee cards -->
+            <div class="stats-section-label" data-i18n="stats_employees_section">Employees this month</div>
             <div class="stats-grid" id="stats-grid"></div>
         </div>
 
@@ -1001,6 +1030,7 @@
 </div>
 
 <!-- Script order is important — api.js must be first -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="assets/js/api.js"></script>
 <script src="assets/js/translations.js"></script>
 <script src="assets/js/dashboard.js"></script>
