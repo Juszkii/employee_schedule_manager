@@ -2515,58 +2515,107 @@ async function loadStats() {
 }
 
 async function openDetailedStats() {
-    const month = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
-    const data = await apiFetch(`/stats/?month=${month}`);
-    const stats = Array.isArray(data) ? data : [];
+    const locale     = getLang() === "pl" ? "pl-PL" : "en-US";
+    const month      = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
+    const prevDate   = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    const prevMonth  = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`;
+
+    const [data, prevData] = await Promise.all([
+        apiFetch(`/stats/?month=${month}`),
+        apiFetch(`/stats/?month=${prevMonth}`)
+    ]);
+
+    const stats     = Array.isArray(data)     ? data     : [];
+    const prevStats = Array.isArray(prevData) ? prevData : [];
     const container = document.getElementById("detailed-stats-content");
 
     if (stats.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted); padding:16px 0">No data for this month.</p>';
+        container.innerHTML = `<p style="color:var(--text-muted);padding:24px 0;text-align:center">${t("stats_no_data")}</p>`;
         openModal("modal-detailed-stats");
         return;
     }
 
-    const totalHours = stats.reduce((s, r) => s + r.total_hours, 0);
+    const totalHours  = stats.reduce((s, r) => s + r.total_hours, 0);
     const totalShifts = stats.reduce((s, r) => s + r.shifts_count, 0);
-    const avgHours = stats.length ? (totalHours / stats.length).toFixed(1) : 0;
+    const avgHours    = totalHours / stats.length;
+    const prevHours   = prevStats.reduce((s, r) => s + r.total_hours, 0);
+    const prevShifts  = prevStats.reduce((s, r) => s + r.shifts_count, 0);
+    const prevAvg     = prevStats.length ? prevStats.reduce((s, r) => s + r.total_hours, 0) / prevStats.length : 0;
+    const monthLabel  = currentDate.toLocaleDateString(locale, { month: "long", year: "numeric" });
 
-    const monthLabel = currentDate.toLocaleDateString(getLang() === "pl" ? "pl-PL" : "en-US", { month: "long", year: "numeric" });
+    function deltaBadge(curr, prev) {
+        if (prev === 0) return "";
+        const pct  = Math.round(((curr - prev) / prev) * 100);
+        const cls  = pct >= 0 ? "up" : "down";
+        const sign = pct >= 0 ? "+" : "";
+        return `<span class="stats-kpi-delta ${cls}" style="font-size:11px">${sign}${pct}%</span>`;
+    }
+
+    const SVG_CLOCK = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+    const SVG_CAL   = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+    const SVG_PULSE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`;
+
+    const kpis = [
+        { cls:"kpi-blue",   icon:SVG_CLOCK, val:`${totalHours.toFixed(1)}h`, label:t("stats_total_hours"),  dl:deltaBadge(totalHours, prevHours)  },
+        { cls:"kpi-violet", icon:SVG_CAL,   val:totalShifts,                 label:t("stats_total_shifts"), dl:deltaBadge(totalShifts, prevShifts) },
+        { cls:"kpi-teal",   icon:SVG_PULSE, val:`${avgHours.toFixed(1)}h`,   label:t("stats_avg_hours"),    dl:deltaBadge(avgHours, prevAvg)       }
+    ];
+
+    const sorted  = [...stats].sort((a, b) => b.total_hours - a.total_hours);
+    const maxHours = sorted[0]?.total_hours || 1;
+    const BAR_COLORS = ["#f59e0b","#94a3b8","#c2864a"];
+    const RANK_CLS   = ["rank-gold","rank-silver","rank-bronze"];
+
+    const rankRows = sorted.map((s, i) => {
+        const user      = allUsers.find(u => u.id === s.user_id);
+        const deptColor = user?.department?.color || "#3b82f6";
+        const deptName  = user?.department?.name  || "";
+        const initials  = s.user_name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+        const pct       = Math.round((s.total_hours / maxHours) * 100);
+        const barColor  = i < 3 ? BAR_COLORS[i] : deptColor;
+        const rankCls   = i < 3 ? RANK_CLS[i] : "";
+        const medal     = i < 3 ? ["🥇","🥈","🥉"][i] : i + 1;
+        const shiftsLabel = getLang() === "pl" ? "zmian" : "shifts";
+
+        return `
+        <div class="dstats-rank-item ${rankCls}">
+            <div class="dstats-rank-medal">${medal}</div>
+            <div class="dstats-rank-avatar" style="background:linear-gradient(135deg,${deptColor},${deptColor}99)">${initials}</div>
+            <div class="dstats-rank-info">
+                <div class="dstats-rank-name">${s.user_name}</div>
+                ${deptName ? `<div class="dstats-rank-dept" style="background:${deptColor}22;color:${deptColor}">${deptName}</div>` : ""}
+            </div>
+            <div class="dstats-rank-bar-wrap">
+                <div class="dstats-rank-bar" style="width:${pct}%;background:${barColor}"></div>
+            </div>
+            <div class="dstats-rank-nums">
+                <div class="dstats-rank-h">${s.total_hours.toFixed(1)}h</div>
+                <div class="dstats-rank-s">${s.shifts_count} ${shiftsLabel}</div>
+            </div>
+        </div>`;
+    }).join("");
 
     container.innerHTML = `
-        <div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap">
-            <div style="flex:1; min-width:120px; background:var(--bg-secondary); border-radius:10px; padding:14px 16px">
-                <div style="font-size:22px; font-weight:700; color:var(--accent)">${totalHours.toFixed(1)}h</div>
-                <div style="font-size:12px; color:var(--text-muted); margin-top:2px">${t("stats_total_hours")}</div>
-            </div>
-            <div style="flex:1; min-width:120px; background:var(--bg-secondary); border-radius:10px; padding:14px 16px">
-                <div style="font-size:22px; font-weight:700; color:var(--accent)">${totalShifts}</div>
-                <div style="font-size:12px; color:var(--text-muted); margin-top:2px">${t("stats_total_shifts")}</div>
-            </div>
-            <div style="flex:1; min-width:120px; background:var(--bg-secondary); border-radius:10px; padding:14px 16px">
-                <div style="font-size:22px; font-weight:700; color:var(--accent)">${avgHours}h</div>
-                <div style="font-size:12px; color:var(--text-muted); margin-top:2px">${t("stats_avg_hours")}</div>
-            </div>
+    <div class="dstats-wrap">
+        <div class="dstats-banner">
+            <div class="dstats-banner-month">${monthLabel}</div>
+            <div class="dstats-banner-sub">${t("modal_detailed_stats")}</div>
         </div>
-        <p style="font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px">${monthLabel}</p>
-        <table class="table" style="width:100%">
-            <thead><tr>
-                <th>${t("th_full_name")}</th>
-                <th style="text-align:right">${t("stats_total_hours")}</th>
-                <th style="text-align:right">${t("stats_total_shifts")}</th>
-                <th style="text-align:right">${t("stats_avg_hours")}</th>
-            </tr></thead>
-            <tbody>
-                ${stats.sort((a, b) => b.total_hours - a.total_hours).map(s => {
-                    const avg = s.shifts_count ? (s.total_hours / s.shifts_count).toFixed(1) : "0.0";
-                    return `<tr>
-                        <td style="font-weight:500">${s.user_name}</td>
-                        <td style="text-align:right">${s.total_hours.toFixed(1)}h</td>
-                        <td style="text-align:right">${s.shifts_count}</td>
-                        <td style="text-align:right">${avg}h</td>
-                    </tr>`;
-                }).join("")}
-            </tbody>
-        </table>
-    `;
+        <div class="dstats-kpi-row">
+            ${kpis.map(k => `
+            <div class="dstats-kpi ${k.cls}">
+                <div class="dstats-kpi-header">
+                    <div class="dstats-kpi-icon">${k.icon}</div>
+                    ${k.dl}
+                </div>
+                <div class="dstats-kpi-val">${k.val}</div>
+                <div class="dstats-kpi-label">${k.label}</div>
+            </div>`).join("")}
+        </div>
+        <div class="dstats-section-label">${getLang() === "pl" ? "Ranking pracowników" : "Employee ranking"}</div>
+        <div class="dstats-rank-list">${rankRows}</div>
+    </div>`;
+
     openModal("modal-detailed-stats");
+    staggerAnimate(Array.from(container.querySelectorAll(".dstats-rank-item")), "stagger-pop", 50);
 }

@@ -2892,6 +2892,225 @@ h1, h2, h3, .brand-icon {
     .mobile-more-logout svg { color: var(--danger); }
 }
 
+/* ── DETAILED STATS MODAL ───────────────────────────────────*/
+
+.dstats-wrap { display: flex; flex-direction: column; gap: 0; }
+
+.dstats-banner {
+    background: linear-gradient(135deg, rgba(59,130,246,.12) 0%, rgba(139,92,246,.10) 60%, rgba(20,184,166,.08) 100%);
+    border: 1px solid rgba(59,130,246,.2);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+.dstats-banner::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,246,.15), transparent 70%);
+    pointer-events: none;
+}
+.dstats-banner-month {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: capitalize;
+    line-height: 1.2;
+}
+.dstats-banner-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.dstats-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.dstats-kpi {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, border-color .2s;
+}
+.dstats-kpi::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity .2s;
+    border-radius: 14px;
+}
+.dstats-kpi:hover { transform: translateY(-2px); }
+.dstats-kpi:hover::before { opacity: 1; }
+
+.dstats-kpi.kpi-blue  { border-color: rgba(59,130,246,.35); }
+.dstats-kpi.kpi-blue::before  { background: rgba(59,130,246,.04); }
+.dstats-kpi.kpi-blue  .dstats-kpi-val { color: #3b82f6; }
+.dstats-kpi.kpi-blue  .dstats-kpi-icon { background: rgba(59,130,246,.15); color: #3b82f6; }
+
+.dstats-kpi.kpi-violet { border-color: rgba(139,92,246,.35); }
+.dstats-kpi.kpi-violet::before { background: rgba(139,92,246,.04); }
+.dstats-kpi.kpi-violet .dstats-kpi-val { color: #8b5cf6; }
+.dstats-kpi.kpi-violet .dstats-kpi-icon { background: rgba(139,92,246,.15); color: #8b5cf6; }
+
+.dstats-kpi.kpi-teal { border-color: rgba(20,184,166,.35); }
+.dstats-kpi.kpi-teal::before { background: rgba(20,184,166,.04); }
+.dstats-kpi.kpi-teal .dstats-kpi-val { color: #14b8a6; }
+.dstats-kpi.kpi-teal .dstats-kpi-icon { background: rgba(20,184,166,.15); color: #14b8a6; }
+
+.dstats-kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.dstats-kpi-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+}
+.dstats-kpi-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+}
+.dstats-kpi-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.dstats-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.dstats-section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.dstats-rank-list { display: flex; flex-direction: column; gap: 8px; }
+
+.dstats-rank-item {
+    display: grid;
+    grid-template-columns: 36px 40px 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: border-color .2s, transform .15s;
+    cursor: default;
+}
+.dstats-rank-item:hover { border-color: rgba(59,130,246,.4); transform: translateX(3px); }
+
+.dstats-rank-medal {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: rgba(100,116,139,.15);
+    color: var(--text-muted);
+    border: 1.5px solid rgba(100,116,139,.25);
+}
+.dstats-rank-item.rank-gold   .dstats-rank-medal { background: rgba(245,158,11,.15); color: #f59e0b; border-color: rgba(245,158,11,.4); }
+.dstats-rank-item.rank-silver .dstats-rank-medal { background: rgba(148,163,184,.12); color: #94a3b8; border-color: rgba(148,163,184,.35); }
+.dstats-rank-item.rank-bronze .dstats-rank-medal { background: rgba(180,116,72,.15); color: #c2864a; border-color: rgba(180,116,72,.35); }
+
+.dstats-rank-item.rank-gold   { border-color: rgba(245,158,11,.25); background: rgba(245,158,11,.03); }
+.dstats-rank-item.rank-silver { border-color: rgba(148,163,184,.2); }
+.dstats-rank-item.rank-bronze { border-color: rgba(180,116,72,.2); }
+
+.dstats-rank-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.dstats-rank-info { min-width: 0; }
+.dstats-rank-name {
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dstats-rank-dept {
+    display: inline-block;
+    margin-top: 3px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .03em;
+}
+
+.dstats-rank-bar-wrap {
+    width: 120px;
+    height: 6px;
+    background: rgba(255,255,255,.06);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.dstats-rank-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+
+.dstats-rank-nums { text-align: right; flex-shrink: 0; }
+.dstats-rank-h {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+.dstats-rank-s { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+@media (max-width: 600px) {
+    .dstats-kpi-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .dstats-kpi { padding: 12px 10px; }
+    .dstats-kpi-val { font-size: 20px; }
+    .dstats-rank-item { grid-template-columns: 28px 34px 1fr auto; gap: 8px; }
+    .dstats-rank-bar-wrap { display: none; }
+    .dstats-banner-month { font-size: 18px; }
+}
+
 /* ── Very small phones ── */
 @media (max-width: 400px) {
     .stats-grid { grid-template-columns: 1fr; }
