@@ -253,26 +253,16 @@
                 <h1 class="page-title" data-i18n="title_announcements">Announcements</h1>
                 <button type="button" class="btn-primary manager-only" onclick="openAddAnnouncementModal()" style="width:auto; padding:10px 20px;" data-i18n="btn_add_announcement">+ Add Announcement</button>
             </div>
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 style="margin:0;" data-i18n="section_announcements">Announcements</h3>
-                </div>
-                <div id="announcements-list"></div>
-            </div>
+            <div id="announcements-list"></div>
         </div>
 
         <!-- VIEW: NOTIFICATIONS -->
         <div id="view-notifications" style="display:none">
             <div class="page-header">
                 <h1 class="page-title" data-i18n="title_notifications">Notifications</h1>
+                <button type="button" id="mark-all-read-btn" class="btn-secondary manager-only" style="display:none;width:auto;padding:9px 18px" data-i18n="btn_mark_all_read">Mark All as Read</button>
             </div>
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0;" data-i18n="section_your_notifications">Your Notifications</h3>
-                    <button type="button" id="mark-all-read-btn" style="display: none; padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;" data-i18n="btn_mark_all_read">Mark All as Read</button>
-                </div>
-                <div id="notifications-list"></div>
-            </div>
+            <div id="notifications-list"></div>
         </div>
 
         <!-- VIEW: STATISTICS (manager only) -->

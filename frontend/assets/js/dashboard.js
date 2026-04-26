@@ -1441,46 +1441,69 @@ async function loadRequestsBadge() {
 }
 
 async function loadNotifications() {
-    const data = await apiFetch("/notifications/");
+    const data          = await apiFetch("/notifications/");
     const notifications = data || [];
-    allNotifications = notifications;
-    const list = document.getElementById("notifications-list");
-    list.innerHTML = "";
+    allNotifications    = notifications;
+    const list          = document.getElementById("notifications-list");
+    const locale        = getLang() === "pl" ? "pl-PL" : "en-US";
+    list.innerHTML      = "";
 
     const markAllButton = document.getElementById("mark-all-read-btn");
-    const unreadCount = notifications.filter(n => !n.is_read).length;
-    markAllButton.style.display = unreadCount > 0 ? "block" : "none";
+    const unreadCount   = notifications.filter(n => !n.is_read).length;
+    markAllButton.style.display = unreadCount > 0 ? "inline-flex" : "none";
     markAllButton.removeEventListener("click", markAllReadHandler);
     markAllButton.addEventListener("click", markAllReadHandler);
 
     if (notifications.length === 0) {
-        list.innerHTML = '<p style="color: var(--text-muted); text-align:center; padding: 24px">No notifications</p>';
+        const SVG_BELL = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
+        list.innerHTML = `
+        <div class="ann-empty">
+            <div class="ann-empty-icon" style="background:rgba(100,116,139,.1);color:rgba(100,116,139,.5)">${SVG_BELL}</div>
+            <div class="ann-empty-title">${getLang() === "pl" ? "Brak powiadomień" : "No notifications"}</div>
+            <div class="ann-empty-sub">${getLang() === "pl" ? "Wszystko przeczytane!" : "You're all caught up!"}</div>
+        </div>`;
         return;
     }
 
+    const SVG_BELL   = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
+    const SVG_CHECK  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const markLabel  = getLang() === "pl" ? "Przeczytaj" : "Mark read";
+
+    const feed = document.createElement("div");
+    feed.className = "notif-feed";
+
     notifications.forEach(notif => {
-        const div = document.createElement("div");
-        div.className = `notif-item ${notif.is_read ? "read" : "unread"}`;
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:start">
-                <span>${notif.is_read ? "" : "🔵 "}${notif.message}</span>
-                ${!notif.is_read
-                    ? `<button type="button" class="btn-secondary" style="padding:4px 10px; font-size:12px; white-space:nowrap; margin-left:12px" data-notif-id="${notif.id}">Mark Read</button>`
-                    : ""}
+        const row = document.createElement("div");
+        row.className = `notif-row ${notif.is_read ? "read" : "unread"}`;
+
+        const dateStr = new Date(notif.created_at).toLocaleString(locale, {
+            day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+        });
+
+        row.innerHTML = `
+            <div class="notif-row-icon">${SVG_BELL}</div>
+            <div class="notif-row-body">
+                <div class="notif-row-msg">${notif.message}</div>
+                <div class="notif-row-time">${dateStr}</div>
             </div>
-            <div class="notif-time">${new Date(notif.created_at).toLocaleString("en-US")}</div>
+            ${!notif.is_read ? `<div class="notif-unread-dot"></div>` : ""}
+            ${!notif.is_read
+                ? `<button type="button" class="notif-mark-btn" data-notif-id="${notif.id}">${SVG_CHECK} ${markLabel}</button>`
+                : ""}
         `;
-        const markBtn = div.querySelector("[data-notif-id]");
+
+        const markBtn = row.querySelector("[data-notif-id]");
         if (markBtn) {
             markBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 markRead(notif.id);
             });
         }
-        list.appendChild(div);
+        feed.appendChild(row);
     });
 
-    staggerAnimate(Array.from(list.querySelectorAll(".notif-item")), "stagger-slide", 45);
+    list.appendChild(feed);
+    staggerAnimate(Array.from(feed.querySelectorAll(".notif-row")), "stagger-slide", 40);
 }
 
 async function markAllReadHandler(event) {
@@ -1879,47 +1902,84 @@ async function deletePosition(id) {
 // ── ANNOUNCEMENTS ──────────────────────────────────────────────────────────────
 
 async function loadAnnouncements() {
-    const data = await apiFetch("/announcements/");
+    const data  = await apiFetch("/announcements/");
     const items = Array.isArray(data) ? data : [];
-    const list = document.getElementById("announcements-list");
+    const list  = document.getElementById("announcements-list");
+    const locale = getLang() === "pl" ? "pl-PL" : "en-US";
     list.innerHTML = "";
 
     if (items.length === 0) {
-        list.innerHTML = '<div class="card"><p style="color:var(--text-muted); text-align:center; padding:32px 0">No announcements yet</p></div>';
+        const SVG_MEGAPHONE = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>`;
+        list.innerHTML = `
+        <div class="ann-empty">
+            <div class="ann-empty-icon">${SVG_MEGAPHONE}</div>
+            <div class="ann-empty-title">${t("no_announcements") || "No announcements yet"}</div>
+            <div class="ann-empty-sub">${getLang() === "pl" ? "Nowe ogłoszenia pojawią się tutaj" : "New announcements will appear here"}</div>
+        </div>`;
         return;
     }
 
+    const user     = getCurrentUser();
+    const lastSeen = localStorage.getItem(`ann_seen_${user.id}`) || "1970-01-01T00:00:00";
+
+    const SVG_MEGAPHONE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>`;
+    const SVG_EYE  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    const SVG_DEL  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
+
     items.forEach(ann => {
+        const isNew      = new Date(ann.created_at) > new Date(lastSeen);
+        const deptColor  = ann.department?.color || "#3b82f6";
+        const deptName   = ann.department?.name;
+        const allLabel   = getLang() === "pl" ? "Wszyscy" : "All";
+        const initials   = (ann.author_name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+        const date       = new Date(ann.created_at).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+
+        const seenLabel  = getLang() === "pl" ? "Widziano" : "Seen by";
+        const delLabel   = getLang() === "pl" ? "Usuń" : "Delete";
+
         const card = document.createElement("div");
-        card.className = "announcement-card";
-
-        const deptBadge = ann.department
-            ? `<span class="label-badge" style="background:rgba(108,99,255,.15); color:var(--accent)">${ann.department.name}</span>`
-            : `<span class="label-badge" style="background:rgba(108,99,255,.15); color:var(--accent)">All Departments</span>`;
-
-        const date = new Date(ann.created_at).toLocaleDateString("en-US", {
-            year: "numeric", month: "long", day: "numeric"
-        });
-
+        card.className = "ann-card";
         card.innerHTML = `
-            <div class="announcement-header">
-                <h3 class="announcement-title">📢 ${ann.title}</h3>
-                ${isManager() ? `
-                    <div style="display:flex; gap:8px; flex-shrink:0">
-                        <button type="button" class="btn-secondary" style="padding:5px 12px;font-size:12px" onclick="showReaders(${ann.id})">
-                            👁 Seen by ${ann.readers_count}
+            <div class="ann-card-strip" style="background:${deptColor}"></div>
+            <div class="ann-card-body">
+                <div class="ann-top">
+                    <div class="ann-left">
+                        <div class="ann-icon-wrap" style="background:${deptColor}18;color:${deptColor}">${SVG_MEGAPHONE}</div>
+                        <div class="ann-title-row">
+                            <div class="ann-title-line">
+                                <span class="ann-title">${ann.title}</span>
+                                ${isNew ? `<span class="ann-new-badge">${getLang() === "pl" ? "NOWE" : "NEW"}</span>` : ""}
+                            </div>
+                            <div class="ann-meta">
+                                <div class="ann-author-avatar" style="background:linear-gradient(135deg,${deptColor},${deptColor}99)">${initials}</div>
+                                <span>${ann.author_name}</span>
+                                <span>·</span>
+                                <span>${date}</span>
+                            </div>
+                        </div>
+                    </div>
+                    ${isManager() ? `
+                    <div class="ann-actions">
+                        <button type="button" class="ann-action-btn" onclick="showReaders(${ann.id})">
+                            ${SVG_EYE} ${seenLabel} ${ann.readers_count}
                         </button>
-                        <button type="button" class="btn-danger" style="padding:5px 12px;font-size:12px" onclick="deleteAnnouncement(${ann.id})">Delete</button>
+                        <button type="button" class="ann-action-btn danger" onclick="deleteAnnouncement(${ann.id})">
+                            ${SVG_DEL} ${delLabel}
+                        </button>
                     </div>` : ""}
-            </div>
-            <p class="announcement-content">${ann.content}</p>
-            <div class="announcement-footer">
-                <span>${ann.author_name} · ${date}</span>
-                ${deptBadge}
-            </div>
-        `;
+                </div>
+                <p class="ann-content">${ann.content}</p>
+                <div class="ann-footer">
+                    <div class="ann-dept-pill" style="background:${deptColor}18;color:${deptColor};border:1px solid ${deptColor}35">
+                        <span style="width:6px;height:6px;border-radius:50%;background:${deptColor};display:inline-block;flex-shrink:0"></span>
+                        ${deptName || allLabel}
+                    </div>
+                </div>
+            </div>`;
         list.appendChild(card);
     });
+
+    staggerAnimate(Array.from(list.querySelectorAll(".ann-card")), "stagger-slide", 55);
 }
 
 function openAddAnnouncementModal() {
