@@ -4,6 +4,7 @@ import secrets
 
 from flask import Flask, Response, request as flask_request, jsonify, send_from_directory
 from flask_jwt_extended import JWTManager
+from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config
 from models import db
@@ -61,10 +62,21 @@ def create_app():
 
     @app.errorhandler(Exception)
     def handle_exception(e):
+        if isinstance(e, HTTPException):
+            return e
         logger.exception("Unhandled exception: %s", e)
         response = jsonify({"error": "An internal server error occurred"})
         response.status_code = 500
         return apply_headers(response)
+
+    @app.route("/favicon.ico")
+    def favicon():
+        return send_from_directory(
+            os.path.join(FRONTEND_DIR, "assets", "images"),
+            "favicon.ico",
+            mimetype="image/vnd.microsoft.icon"
+        ) if os.path.exists(os.path.join(FRONTEND_DIR, "assets", "images", "favicon.ico")) \
+          else ("", 204)
 
     @app.before_request
     def handle_options():
