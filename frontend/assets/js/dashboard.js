@@ -646,10 +646,22 @@ function renderWeeklyCalendar() {
     header.className = 'wk-header';
     header.innerHTML = '<div class="wk-corner"></div>';
     days.forEach((d, i) => {
-        const isToday = d.getTime() === today.getTime();
+        const isToday  = d.getTime() === today.getTime();
+        const dayStr   = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        let dayCnt = allShifts.filter(s => s.date === dayStr).length;
+        if (currentDepartment !== null) {
+            const deptIds = new Set(allUsers.filter(u => u.department_id === currentDepartment).map(u => u.id));
+            dayCnt = allShifts.filter(s => s.date === dayStr && deptIds.has(s.user_id)).length;
+        }
         const el = document.createElement('div');
         el.className = 'wk-day-header' + (isToday ? ' today' : '');
-        el.innerHTML = `<span class="wk-day-name">${dayNames[i]}</span><span class="wk-day-num${isToday ? ' today' : ''}">${d.getDate()}</span>`;
+        el.title = getLang() === 'pl' ? 'Pokaz zmiany tego dnia' : 'Show day shifts';
+        el.innerHTML = `
+            <span class="wk-day-name">${dayNames[i]}</span>
+            <span class="wk-day-num${isToday ? ' today' : ''}">${d.getDate()}</span>
+            ${dayCnt > 0 ? `<span class="wk-day-count">${dayCnt}</span>` : '<span class="wk-day-count" style="opacity:0">0</span>'}
+        `;
+        el.addEventListener('click', () => openDayOverview(dayStr));
         header.appendChild(el);
     });
     grid.appendChild(header);
@@ -789,6 +801,129 @@ function updateScheduleStats() {
 
 
 // ── DAY DETAIL MODAL ─────────────────────────────────────────────────────
+
+// ── DAY OVERVIEW (weekly calendar header click) ────────────────────────────
+let _dovSort = 'time';
+
+function openDayOverview(dateStr) {
+    const dayShifts = allShifts.filter(s => s.date === dateStr);
+    const dayVac    = calendarRequests.filter(r => r.date_from <= dateStr && r.date_to >= dateStr);
+    _dovSort = 'time';
+    _renderDayOverview(dateStr, dayShifts, dayVac);
+    openModal('modal-day');
+}
+
+function _renderDayOverview(dateStr, shifts, vacations) {
+    const locale = getLang() === 'pl' ? 'pl-PL' : 'en-US';
+    const pl     = getLang() === 'pl';
+    const date   = new Date(dateStr + 'T00:00:00');
+
+    document.getElementById('day-modal-title').textContent =
+        date.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const list = document.getElementById('day-modal-list');
+    list.innerHTML = '';
+
+    if (isManager()) {
+        const bar = document.createElement('div');
+        bar.className = 'day-sort-bar';
+        const sortKeys = [
+            { key: 'time', label: pl ? 'Godzina' : 'Time' },
+            { key: 'dept', label: pl ? 'Dzial' : 'Department' },
+            { key: 'name', label: pl ? 'Imie' : 'Name' },
+        ];
+        sortKeys.forEach(({ key, label }) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'day-sort-btn' + (_dovSort === key ? ' active' : '');
+            btn.textContent = label;
+            btn.onclick = () => { _dovSort = key; _renderDayOverview(dateStr, shifts, vacations); };
+            bar.appendChild(btn);
+        });
+        list.appendChild(bar);
+    }
+
+    let sorted = [...shifts];
+    if (_dovSort === 'time') {
+        sorted.sort((a, b) => a.start_time.localeCompare(b.start_time));
+    } else if (_dovSort === 'dept') {
+        sorted.sort((a, b) => {
+            const ua = allUsers.find(u => u.id === a.user_id);
+            const ub = allUsers.find(u => u.id === b.user_id);
+            return (ua?.department?.name || '').localeCompare(ub?.department?.name || '');
+        });
+    } else if (_dovSort === 'name') {
+        sorted.sort((a, b) => a.user_name.localeCompare(b.user_name));
+    }
+
+    if (sorted.length === 0 && vacations.length === 0) {
+        const empty = document.createElement('p');
+        empty.style.cssText = 'color:var(--text-muted);text-align:center;padding:24px 0';
+        empty.textContent = t('no_shifts');
+        list.appendChild(empty);
+    } else {
+        vacations.forEach(req => list.appendChild(_buildVacationRow(req)));
+
+        if (_dovSort === 'dept' && isManager() && sorted.length > 0) {
+            const groups = {};
+            sorted.forEach(s => {
+                const u    = allUsers.find(u => u.id === s.user_id);
+                const key  = u?.department?.name || (pl ? 'Bez dzialu' : 'No dept');
+                const col  = u?.department?.color || 'var(--text-muted)';
+                if (!groups[key]) groups[key] = { color: col, shifts: [] };
+                groups[key].shifts.push(s);
+            });
+            Object.entries(groups).forEach(([deptName, g]) => {
+                const gh = document.createElement('div');
+                gh.className = 'day-group-header';
+                gh.innerHTML = '<span class="day-group-dot" style="background:' + g.color + '"></span>' + deptName + '<span class="day-group-count">' + g.shifts.length + '</span>';
+                list.appendChild(gh);
+                g.shifts.forEach(s => list.appendChild(_buildShiftRow(s)));
+            });
+        } else {
+            sorted.forEach(s => list.appendChild(_buildShiftRow(s)));
+        }
+    }
+
+    const addBtn = document.getElementById('day-modal-add-btn');
+    if (isManager()) {
+        addBtn.style.display = 'inline-block';
+        addBtn.onclick = () => { closeModal('modal-day'); openAddShiftModal(dateStr); };
+    } else {
+        addBtn.style.display = 'none';
+    }
+
+    staggerAnimate(Array.from(list.querySelectorAll('.day-shift-row')), 'stagger-slide', 35);
+}
+
+function _buildShiftRow(shift) {
+    const row       = document.createElement('div');
+    row.className   = 'day-shift-row';
+    const user      = allUsers.find(u => u.id === shift.user_id);
+    const deptColor = user?.department?.color || '#3B82F6';
+    const roleHtml  = user?.label
+        ? '<span class="day-pos-badge" style="background:' + deptColor + '22;color:' + deptColor + ';border-color:' + deptColor + '44;box-shadow:0 0 7px ' + deptColor + '55">' + user.label.name + '</span>'
+        : '';
+    const posHtml   = shift.position
+        ? '<span class="day-pos-badge" style="background:' + shift.position.color + '22;color:' + shift.position.color + ';border-color:' + shift.position.color + '44">' + shift.position.name + '</span>'
+        : '';
+    const noteHtml  = shift.note ? '<span class="day-shift-note">' + shift.note + '</span>' : '';
+    const editBtn   = isManager()
+        ? '<button type="button" class="btn-secondary" style="padding:5px 12px;font-size:12px;flex-shrink:0" onclick="openEditShiftFromDay(' + shift.id + ')">' + t('btn_edit') + '</button>'
+        : '';
+    row.innerHTML = '<div class="day-shift-left"><div class="day-shift-indicator" style="background:' + deptColor + '"></div><div><div class="day-shift-name">' + shift.user_name + ' ' + roleHtml + '</div><div class="day-shift-time">' + shift.start_time + ' – ' + shift.end_time + ' ' + posHtml + ' ' + noteHtml + '</div></div></div>' + editBtn;
+    return row;
+}
+
+function _buildVacationRow(req) {
+    const row   = document.createElement('div');
+    row.className = 'day-shift-row';
+    const color = req.status === 'pending' ? 'var(--warning)' : 'var(--success)';
+    const lbl   = req.status === 'pending' ? t('status_pending') : t('status_approved');
+    row.innerHTML = '<div class="day-shift-left"><div class="day-shift-indicator" style="background:' + color + '"></div><div><div class="day-shift-name">' + req.user_name + '</div><div class="day-shift-time">🏖 ' + t('opt_time_off') + ' &nbsp;<span class="day-pos-badge" style="background:' + color + '22;color:' + color + ';border-color:' + color + '44">' + lbl + '</span></div></div></div>';
+    return row;
+}
+
 async function openDayModal(dateStr, dayShifts, dayVacations = []) {
     const date = new Date(dateStr + "T00:00:00");
     const locale = getLang() === "pl" ? "pl-PL" : "en-US";

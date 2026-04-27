@@ -2714,6 +2714,75 @@ h1, h2, h3, .brand-icon {
     box-shadow: 0 0 6px rgba(239,68,68,0.6);
 }
 
+.wk-day-header { cursor: pointer; }
+.wk-day-header:hover { background: rgba(59,130,246,0.07) !important; }
+
+.wk-day-count {
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(59,130,246,0.18);
+    color: #3b82f6;
+    border-radius: 10px;
+    padding: 1px 7px;
+    min-width: 18px;
+    text-align: center;
+    font-variant-numeric: tabular-nums lining-nums;
+    transition: background 0.15s;
+}
+.wk-day-header:hover .wk-day-count { background: rgba(59,130,246,0.3); }
+
+.day-sort-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.day-sort-btn {
+    padding: 5px 13px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+}
+.day-sort-btn:hover { background: rgba(255,255,255,.04); color: var(--text); border-color: rgba(255,255,255,.12); }
+.day-sort-btn.active { background: rgba(59,130,246,.15); color: #3b82f6; border-color: rgba(59,130,246,.4); }
+
+.day-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin: 14px 0 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+}
+.day-group-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.day-group-count {
+    margin-left: auto;
+    background: rgba(100,116,139,.15);
+    color: var(--text-muted);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums lining-nums;
+}
+
+
 /* ══════════════════════════════════════════════════════════════
    MOBILE — ukryte na desktopie
    ══════════════════════════════════════════════════════════════ */
