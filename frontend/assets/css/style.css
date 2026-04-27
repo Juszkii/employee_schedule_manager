@@ -3244,7 +3244,7 @@ h1, h2, h3, .brand-icon {
 .dstats-kpi-val {
     font-family: 'DM Sans', sans-serif;
     font-size: 26px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1;
     font-variant-numeric: tabular-nums lining-nums;
 }
@@ -3357,7 +3357,7 @@ h1, h2, h3, .brand-icon {
 .dstats-rank-h {
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text);
     font-variant-numeric: tabular-nums lining-nums;
 }
