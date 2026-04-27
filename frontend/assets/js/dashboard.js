@@ -617,8 +617,8 @@ async function loadWeekData() {
 }
 
 // ── WEEKLY CALENDAR RENDER ─────────────────────────────────
-const WK_HOUR_START = 0;
-const WK_HOUR_END   = 23;
+const WK_HOUR_START = 6;
+const WK_HOUR_END   = 22;
 const WK_HOUR_PX    = 60;
 
 function renderWeeklyCalendar() {
@@ -710,12 +710,14 @@ function renderWeeklyCalendar() {
         laned.forEach(shift => {
             const top    = (shift.sh - WK_HOUR_START) * WK_HOUR_PX;
             const height = Math.max((shift.eh - shift.sh) * WK_HOUR_PX - 3, 22);
-            const color  = getEmployeeColor(shift.user_id);
             const w = 100 / totalLanes;
+            const empUser   = allUsers.find(u => u.id === shift.user_id);
+            const deptColor = empUser?.department?.color || EMPLOYEE_COLORS[shift.user_id % EMPLOYEE_COLORS.length].border;
+            const shiftBg   = deptColor + '28';
 
             const card = document.createElement('div');
             card.className = 'wk-shift';
-            card.style.cssText = `top:${top}px;height:${height}px;left:calc(${shift.lane*w}% + 2px);width:calc(${w}% - 4px);background:${color.bg};border-left:3px solid ${color.border};color:${color.text};`;
+            card.style.cssText = `top:${top}px;height:${height}px;left:calc(${shift.lane*w}% + 2px);width:calc(${w}% - 4px);background:${shiftBg};border-left:3px solid ${deptColor};color:#e2e8f0;`;
             card.innerHTML = `
                 <div class="wk-shift-name">${shift.user_name.split(' ')[0]}</div>
                 <div class="wk-shift-time">${shift.start_time}–${shift.end_time}</div>
@@ -725,6 +727,18 @@ function renderWeeklyCalendar() {
             col.appendChild(card);
         });
 
+        // Current time line
+        if (isToday) {
+            const now = new Date();
+            const nowH = now.getHours() + now.getMinutes() / 60;
+            if (nowH >= WK_HOUR_START && nowH <= WK_HOUR_END) {
+                const line = document.createElement('div');
+                line.className = 'wk-now-line';
+                line.style.top = `${(nowH - WK_HOUR_START) * WK_HOUR_PX}px`;
+                col.appendChild(line);
+            }
+        }
+
         body.appendChild(col);
     });
 
@@ -732,6 +746,13 @@ function renderWeeklyCalendar() {
     scroll.className = 'wk-scroll';
     scroll.appendChild(body);
     grid.appendChild(scroll);
+
+    // Auto-scroll to 8:00 (or current hour if today is in view)
+    const now = new Date();
+    const scrollToH = days.some(d => d.getTime() === today.getTime())
+        ? Math.max(now.getHours() - 1, WK_HOUR_START)
+        : 8;
+    requestAnimationFrame(() => { scroll.scrollTop = (scrollToH - WK_HOUR_START) * WK_HOUR_PX; });
 }
 
 // ── SCHEDULE STATS UPDATE ──────────────────────────────────
