@@ -1484,6 +1484,7 @@ h1, h2, h3, .brand-icon {
     font-size: 22px;
     font-weight: 700;
     color: var(--accent);
+    font-variant-numeric: tabular-nums lining-nums;
 }
 
 .emp-sched-stat-lbl {
@@ -1903,6 +1904,7 @@ h1, h2, h3, .brand-icon {
     font-weight: 800;
     line-height: 1;
     margin-bottom: 4px;
+    font-variant-numeric: tabular-nums lining-nums;
 }
 
 .stats-kpi-label {
@@ -3244,6 +3246,7 @@ h1, h2, h3, .brand-icon {
     font-size: 26px;
     font-weight: 700;
     line-height: 1;
+    font-variant-numeric: tabular-nums lining-nums;
 }
 .dstats-kpi-label {
     font-size: 11px;
@@ -3356,6 +3359,7 @@ h1, h2, h3, .brand-icon {
     font-size: 15px;
     font-weight: 700;
     color: var(--text);
+    font-variant-numeric: tabular-nums lining-nums;
 }
 .dstats-rank-s { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
