@@ -3242,7 +3242,7 @@ h1, h2, h3, .brand-icon {
     display: flex; align-items: center; justify-content: center;
 }
 .dstats-kpi-val {
-    font-family: 'Syne', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 26px;
     font-weight: 700;
     line-height: 1;
@@ -3355,7 +3355,7 @@ h1, h2, h3, .brand-icon {
 
 .dstats-rank-nums { text-align: right; flex-shrink: 0; }
 .dstats-rank-h {
-    font-family: 'Syne', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     font-weight: 700;
     color: var(--text);
